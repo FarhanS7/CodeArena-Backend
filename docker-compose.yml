@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  auth-db:
+    image: postgres:15
+    container_name: auth_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: auth_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+    networks:
+      - judge_network
+
+  auth-service:
+    build: ./auth-service
+    restart: always
+    env_file:
+      - ./auth-service/.env
+    ports:
+      - "3001:3001"
+    depends_on:
+      - auth-db
+    networks:
+      - judge_network
+
+networks:
+  judge_network:
+
+volumes:
+  auth_data:
