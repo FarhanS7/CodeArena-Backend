@@ -18,4 +18,12 @@ export class UserRepository {
   async findByEmail(email: string): Promise<User | null> {
     return await this.repo.findOne({ where: { email } });
   }
+
+  async findById(id: string): Promise<User | null> {
+    return await this.repo.findOne({ where: { id } });
+  }
+
+  async update(id: string, data: Partial<User>): Promise<void> {
+    await this.repo.update({ id }, data);
+  }
 }

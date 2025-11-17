@@ -20,6 +20,9 @@ export class User {
   @Column()
   passwordHash: string;
 
+  @Column({ nullable: true })
+  refreshTokenHash: string | null;
+
   @Column({ default: "USER" })
   role: string;
 
