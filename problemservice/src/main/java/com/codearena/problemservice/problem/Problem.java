@@ -42,13 +42,23 @@ public class Problem {
     @Column(name = "example_output")
     private String exampleOutput;
 
-    // FIX: Add testCases relationship
+    // Relationship: one Problem → many TestCases
     @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TestCase> testCases = new ArrayList<>();
 
-    public Problem() {}
+    // ---- Constructors ----
 
-    public Problem(Long id, String title, Difficulty difficulty, String description, String exampleInput, String exampleOutput) {
+    public Problem() {
+    }
+
+    public Problem(
+            Long id,
+            String title,
+            Difficulty difficulty,
+            String description,
+            String exampleInput,
+            String exampleOutput
+    ) {
         this.id = id;
         this.title = title;
         this.difficulty = difficulty;
@@ -59,25 +69,54 @@ public class Problem {
 
     // ---- Getters & Setters ----
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Difficulty getDifficulty() { return difficulty; }
-    public void setDifficulty(Difficulty difficulty) { this.difficulty = difficulty; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public String getExampleInput() { return exampleInput; }
-    public void setExampleInput(String exampleInput) { this.exampleInput = exampleInput; }
+    public Difficulty getDifficulty() {
+        return difficulty;
+    }
 
-    public String getExampleOutput() { return exampleOutput; }
-    public void setExampleOutput(String exampleOutput) { this.exampleOutput = exampleOutput; }
+    public void setDifficulty(Difficulty difficulty) {
+        this.difficulty = difficulty;
+    }
 
-    // FIX: Add missing getter + setter
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getExampleInput() {
+        return exampleInput;
+    }
+
+    public void setExampleInput(String exampleInput) {
+        this.exampleInput = exampleInput;
+    }
+
+    public String getExampleOutput() {
+        return exampleOutput;
+    }
+
+    public void setExampleOutput(String exampleOutput) {
+        this.exampleOutput = exampleOutput;
+    }
+
     public List<TestCase> getTestCases() {
         return testCases;
     }

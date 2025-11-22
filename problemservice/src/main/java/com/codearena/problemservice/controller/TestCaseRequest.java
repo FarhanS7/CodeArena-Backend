@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class TestCaseRequest {
 
-    @NotBlank(message = "Test input cannot be empty")
+    @NotBlank(message = "Input cannot be empty")
     private String input;
 
     @NotBlank(message = "Expected output cannot be empty")

@@ -9,14 +9,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codearena.problemservice.model.TestCase;
-import com.codearena.problemservice.problem.Difficulty;
 import com.codearena.problemservice.problem.Problem;
 import com.codearena.problemservice.response.ApiResponse;
-import com.codearena.problemservice.response.PaginatedResponse;
 import com.codearena.problemservice.service.ProblemService;
 
 import jakarta.validation.Valid;
@@ -44,7 +41,6 @@ public class ProblemController {
         problem.setExampleInput(request.getExampleInput());
         problem.setExampleOutput(request.getExampleOutput());
 
-        // Convert DTO → Entity
         List<TestCase> testCases = request.getTestCases().stream()
                 .map(tc -> {
                     TestCase testCase = new TestCase();
@@ -62,33 +58,10 @@ public class ProblemController {
     // -------------------------
     // GET ALL PROBLEMS
     // -------------------------
-    // @GetMapping
-    // public ApiResponse getAllProblems() {
-    //     return ApiResponse.success(problemService.getAllProblems());
-    // }
-
-    // -------------------------
-    // SEARCH + FILTER + PAGINATION
-    // -------------------------
-@GetMapping("/search")
-public ApiResponse searchProblems(
-        @RequestParam(required = false) Difficulty difficulty,
-        @RequestParam(required = false) String search,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
-) {
-    var result = problemService.searchProblems(difficulty, search, page, size);
-
-    return ApiResponse.success(
-            new PaginatedResponse<>(
-                    result.getContent(),
-                    result.getNumber(),
-                    result.getSize(),
-                    result.getTotalElements(),
-                    result.getTotalPages()
-            )
-    );
-}
+    @GetMapping
+    public ApiResponse getAllProblems() {
+        return ApiResponse.success(problemService.getAllProblems());
+    }
 
     // -------------------------
     // GET ONE PROBLEM
@@ -99,6 +72,18 @@ public ApiResponse searchProblems(
     }
 
     // -------------------------
+    // UPDATE PROBLEM
+    // -------------------------
+    @PutMapping("/{id}")
+    public ApiResponse updateProblem(
+            @PathVariable Long id,
+            @Valid @RequestBody ProblemUpdateRequest request
+    ) {
+        Problem updated = problemService.updateProblem(id, request);
+        return ApiResponse.success(updated);
+    }
+
+    // -------------------------
     // DELETE PROBLEM
     // -------------------------
     @DeleteMapping("/{id}")
@@ -106,18 +91,4 @@ public ApiResponse searchProblems(
         problemService.deleteProblem(id);
         return ApiResponse.success("Problem deleted successfully");
     }
-
-    // -------------------------
-    // UPDATE PROBLEM
-    // -------------------------
-    @PutMapping("/{id}")
-public ApiResponse updateProblem(
-        @PathVariable Long id,
-        @Valid @RequestBody ProblemUpdateRequest request
-) {
-    Problem updated = problemService.updateProblem(id, request);
-    return ApiResponse.success(updated);
-}
-
-
 }
