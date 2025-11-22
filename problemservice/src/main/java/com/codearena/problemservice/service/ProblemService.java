@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.codearena.problemservice.controller.ProblemUpdateRequest;
+import com.codearena.problemservice.exception.DuplicateTitleException;
+import com.codearena.problemservice.exception.ProblemNotFoundException;
 import com.codearena.problemservice.model.TestCase;
 import com.codearena.problemservice.problem.Difficulty;
 import com.codearena.problemservice.problem.Problem;
@@ -34,7 +36,7 @@ public class ProblemService {
 
         // 1. Check for duplicate title
         if (problemRepository.existsByTitle(problem.getTitle())) {
-            throw new RuntimeException("Problem title already exists!");
+            throw new DuplicateTitleException("Problem title already exists!");
         }
 
         // 2. Save problem
@@ -61,7 +63,7 @@ public class ProblemService {
     // -----------------------
     public Problem getProblemById(Long id) {
         return problemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Problem not found"));
+                .orElseThrow(() -> new ProblemNotFoundException("Problem not found"));
     }
 
     // -----------------------
