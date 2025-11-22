@@ -144,6 +144,35 @@ public Problem updateProblem(Long id, ProblemUpdateRequest request) {
     return problemRepository.save(problem);
 }
 
+// -----------------------------------
+// ADD TEST CASE
+// -----------------------------------
+@Transactional
+public TestCase addTestCase(Long problemId, TestCase dto) {
+
+    Problem problem = getProblemById(problemId);
+
+    dto.setProblem(problem);
+
+    return testCaseRepository.save(dto);
+}
+
+// -----------------------------------
+// GET TEST CASES (hidden)
+// -----------------------------------
+public List<TestCase> getTestCases(Long problemId) {
+    Problem problem = getProblemById(problemId);
+    return problem.getTestCases();
+}
+
+// -----------------------------------
+// DELETE TEST CASE
+// -----------------------------------
+@Transactional
+public void deleteTestCase(Long testCaseId) {
+    testCaseRepository.deleteById(testCaseId);
+}
+
 
 
 }
