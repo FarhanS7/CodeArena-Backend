@@ -1,9 +1,7 @@
 package com.codearena.problemservice.controller;
 
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +16,7 @@ import com.codearena.problemservice.model.TestCase;
 import com.codearena.problemservice.problem.Difficulty;
 import com.codearena.problemservice.problem.Problem;
 import com.codearena.problemservice.response.ApiResponse;
+import com.codearena.problemservice.response.PaginatedResponse;
 import com.codearena.problemservice.service.ProblemService;
 
 import jakarta.validation.Valid;
@@ -63,33 +62,33 @@ public class ProblemController {
     // -------------------------
     // GET ALL PROBLEMS
     // -------------------------
-    @GetMapping
-    public ApiResponse getAllProblems() {
-        return ApiResponse.success(problemService.getAllProblems());
-    }
+    // @GetMapping
+    // public ApiResponse getAllProblems() {
+    //     return ApiResponse.success(problemService.getAllProblems());
+    // }
 
     // -------------------------
     // SEARCH + FILTER + PAGINATION
     // -------------------------
-    @GetMapping("/search")
-    public ApiResponse searchProblems(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Difficulty difficulty,
-            @RequestParam(required = false) String search) {
+@GetMapping("/search")
+public ApiResponse searchProblems(
+        @RequestParam(required = false) Difficulty difficulty,
+        @RequestParam(required = false) String search,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+) {
+    var result = problemService.searchProblems(difficulty, search, page, size);
 
-        Page<Problem> result = problemService.searchProblems(difficulty, search, page, size);
-
-        return ApiResponse.success(
-                Map.of(
-                        "items", result.getContent(),
-                        "page", result.getNumber(),
-                        "size", result.getSize(),
-                        "totalItems", result.getTotalElements(),
-                        "totalPages", result.getTotalPages()
-                )
-        );
-    }
+    return ApiResponse.success(
+            new PaginatedResponse<>(
+                    result.getContent(),
+                    result.getNumber(),
+                    result.getSize(),
+                    result.getTotalElements(),
+                    result.getTotalPages()
+            )
+    );
+}
 
     // -------------------------
     // GET ONE PROBLEM

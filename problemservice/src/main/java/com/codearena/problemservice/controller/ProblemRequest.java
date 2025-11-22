@@ -2,8 +2,6 @@ package com.codearena.problemservice.controller;
 
 import java.util.List;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
 import com.codearena.problemservice.problem.Difficulty;
 
 import jakarta.validation.Valid;
@@ -24,13 +22,14 @@ public class ProblemRequest {
     private Difficulty difficulty;
 
     @NotBlank(message = "Description cannot be empty")
-    @Size(min = 10, message = "Description must be at least 10 characters long")
+    @Size(min = 20, message = "Description must be at least 20 characters")
     private String description;
 
     private String exampleInput;
     private String exampleOutput;
 
     @Valid
-    @NotEmpty(message = "Problem must have at least 1 test case")
+    @NotNull(message = "Test cases must not be null")
+    @Size(min = 1, message = "At least one test case is required")
     private List<TestCaseRequest> testCases;
 }
