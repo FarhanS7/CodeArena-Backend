@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -106,4 +107,18 @@ public class ProblemController {
         problemService.deleteProblem(id);
         return ApiResponse.success("Problem deleted successfully");
     }
+
+    // -------------------------
+    // UPDATE PROBLEM
+    // -------------------------
+    @PutMapping("/{id}")
+public ApiResponse updateProblem(
+        @PathVariable Long id,
+        @Valid @RequestBody ProblemUpdateRequest request
+) {
+    Problem updated = problemService.updateProblem(id, request);
+    return ApiResponse.success(updated);
+}
+
+
 }
