@@ -16,8 +16,11 @@ import com.codearena.problemservice.problem.Problem;
 import com.codearena.problemservice.response.ApiResponse;
 import com.codearena.problemservice.service.ProblemService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Problems", description = "Problem CRUD & Search API")
 @RestController
 @RequestMapping("/problems")
 public class ProblemController {
@@ -31,6 +34,10 @@ public class ProblemController {
     // -------------------------
     // CREATE PROBLEM
     // -------------------------
+    @Operation(
+    summary = "Create a new coding problem",
+    description = "Creates a problem along with metadata and test cases"
+)
     @PostMapping
     public ApiResponse createProblem(@Valid @RequestBody ProblemRequest request) {
 
@@ -58,6 +65,10 @@ public class ProblemController {
     // -------------------------
     // GET ALL PROBLEMS
     // -------------------------
+@Operation(
+    summary = "Get all problems",
+    description = "Returns a list of all public coding problems"
+)
     @GetMapping
     public ApiResponse getAllProblems() {
         return ApiResponse.success(problemService.getAllProblems());
@@ -66,6 +77,10 @@ public class ProblemController {
     // -------------------------
     // GET ONE PROBLEM
     // -------------------------
+    @Operation(
+    summary = "Get problem by ID",
+    description = "Fetch full problem data including metadata"
+)
     @GetMapping("/{id}")
     public ApiResponse getProblem(@PathVariable Long id) {
         return ApiResponse.success(problemService.getProblemById(id));
@@ -74,6 +89,10 @@ public class ProblemController {
     // -------------------------
     // UPDATE PROBLEM
     // -------------------------
+    @Operation(
+    summary = "Update problem",
+    description = "Update the problem and its test cases"
+)
     @PutMapping("/{id}")
     public ApiResponse updateProblem(
             @PathVariable Long id,
@@ -86,6 +105,10 @@ public class ProblemController {
     // -------------------------
     // DELETE PROBLEM
     // -------------------------
+@Operation(
+    summary = "Delete problem",
+    description = "Deletes the problem and its test cases"
+)
     @DeleteMapping("/{id}")
     public ApiResponse deleteProblem(@PathVariable Long id) {
         problemService.deleteProblem(id);
