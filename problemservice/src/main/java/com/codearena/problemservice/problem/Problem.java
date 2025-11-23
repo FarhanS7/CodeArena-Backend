@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.codearena.problemservice.model.TestCase;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,7 +35,7 @@ public class Problem {
     private Difficulty difficulty;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "example_input")
@@ -43,7 +45,12 @@ public class Problem {
     private String exampleOutput;
 
     // Relationship: one Problem → many TestCases
-    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
+@OneToMany(mappedBy = "problem",
+           cascade = CascadeType.ALL,
+           orphanRemoval = true,
+           fetch = FetchType.EAGER)
+
+    @JsonIgnoreProperties("problem") // prevent infinite recursion + lazy issues
     private List<TestCase> testCases = new ArrayList<>();
 
     // ---- Constructors ----

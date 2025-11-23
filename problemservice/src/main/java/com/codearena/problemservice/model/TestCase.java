@@ -1,5 +1,6 @@
 package com.codearena.problemservice.model;
 import com.codearena.problemservice.problem.Problem;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,14 +26,15 @@ public class TestCase {
     private Long id;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false , columnDefinition = "TEXT")
     private String input;
 
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String expectedOutput;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
+    @JsonIgnoreProperties("testCases")
     private Problem problem;
 }

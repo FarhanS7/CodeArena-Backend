@@ -22,11 +22,11 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
+  
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleOtherErrors(Exception ex) {
-        ex.printStackTrace();
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Something went wrong");
-    }
+public ResponseEntity<String> handle(Exception ex) {
+    ex.printStackTrace();
+    return ResponseEntity.status(500).body("Something went wrong");
+}
+
 }
