@@ -49,7 +49,6 @@ public class Problem {
            cascade = CascadeType.ALL,
            orphanRemoval = true,
            fetch = FetchType.EAGER)
-
     @JsonIgnoreProperties("problem") // prevent infinite recursion + lazy issues
     private List<TestCase> testCases = new ArrayList<>();
 
