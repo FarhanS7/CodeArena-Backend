@@ -1,7 +1,7 @@
 import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
+    ConflictException,
+    Injectable,
+    UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
@@ -44,12 +44,13 @@ export class AuthService {
         sub: user.id,
         email: user.email,
         username: user.username,
+        role: user.role,
       },
       { expiresIn: "15m" }
     );
 
     const refreshToken = await this.jwtService.signAsync(
-      { sub: user.id },
+      { sub: user.id, role: user.role },
       {
         secret: process.env.JWT_REFRESH_SECRET,
         expiresIn: "30d",
@@ -112,6 +113,7 @@ export class AuthService {
         sub: user.id,
         email: user.email,
         username: user.username,
+        role: user.role,
       },
       { expiresIn: "15m" }
     );

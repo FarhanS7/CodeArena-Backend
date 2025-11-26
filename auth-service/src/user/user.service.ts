@@ -28,4 +28,9 @@ export class UserService {
   async findById(id: string) {
     return this.userRepository.findById(id);
   }
+
+  async updateUser(user: any) {
+    await this.userRepository.update(user.id, { role: user.role });
+    return this.userRepository.findById(user.id);
+  }
 }
