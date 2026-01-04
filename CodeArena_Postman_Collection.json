@@ -1,0 +1,517 @@
+{
+	"info": {
+		"name": "Code Arena API",
+		"description": "Complete API collection for Code Arena - Auth Service and Problem Service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth Service",
+			"item": [
+				{
+					"name": "1. Signup (User)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"username\": \"regularuser\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/auth/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Signup (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@example.com\",\n  \"username\": \"adminuser\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/auth/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"auth",
+								"signup"
+							]
+						},
+						"description": "After signup, you need to manually update the user's role to 'ADMIN' in the database"
+					},
+					"response": []
+				},
+				{
+					"name": "3. Login (User)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"user_access_token\", jsonData.accessToken);",
+									"pm.environment.set(\"user_refresh_token\", jsonData.refreshToken);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Automatically saves access token to environment variable 'user_access_token'"
+					},
+					"response": []
+				},
+				{
+					"name": "4. Login (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"admin_access_token\", jsonData.accessToken);",
+									"pm.environment.set(\"admin_refresh_token\", jsonData.refreshToken);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Automatically saves access token to environment variable 'admin_access_token'"
+					},
+					"response": []
+				},
+				{
+					"name": "5. Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{admin_refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/auth/refresh",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"{{admin_refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/auth/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Problem Service - Public",
+			"item": [
+				{
+					"name": "Get All Problems (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/problems",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"problems"
+							]
+						},
+						"description": "No authentication required - anyone can view problems"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Problem by ID (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/problems/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"problems",
+								"1"
+							]
+						},
+						"description": "No authentication required - anyone can view a specific problem"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Problem Service - Admin Only",
+			"item": [
+				{
+					"name": "Create Problem (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Two Sum\",\n  \"difficulty\": \"EASY\",\n  \"description\": \"Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.\",\n  \"exampleInput\": \"[2,7,11,15], target = 9\",\n  \"exampleOutput\": \"[0,1]\",\n  \"testCases\": [\n    {\n      \"input\": \"[2,7,11,15], 9\",\n      \"expectedOutput\": \"[0,1]\"\n    },\n    {\n      \"input\": \"[3,2,4], 6\",\n      \"expectedOutput\": \"[1,2]\"\n    },\n    {\n      \"input\": \"[3,3], 6\",\n      \"expectedOutput\": \"[0,1]\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/problems",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"problems"
+							]
+						},
+						"description": "Requires ADMIN role - creates a new problem"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Problem (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Two Sum - Updated\",\n  \"difficulty\": \"MEDIUM\",\n  \"description\": \"Updated description for the Two Sum problem with additional constraints and edge cases to consider.\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/problems/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"problems",
+								"1"
+							]
+						},
+						"description": "Requires ADMIN role - updates an existing problem"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Problem (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/problems/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"problems",
+								"1"
+							]
+						},
+						"description": "Requires ADMIN role - deletes a problem"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Test Case (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input\": \"[1,2,3,4], 7\",\n  \"expectedOutput\": \"[2,3]\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/admin/problems/1/testcases",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"admin",
+								"problems",
+								"1",
+								"testcases"
+							]
+						},
+						"description": "Requires ADMIN role - adds a test case to a problem"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Test Cases (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/admin/problems/1/testcases",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"admin",
+								"problems",
+								"1",
+								"testcases"
+							]
+						},
+						"description": "Requires ADMIN role - gets all test cases including hidden ones"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Test Case (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/admin/problems/testcases/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"admin",
+								"problems",
+								"testcases",
+								"1"
+							]
+						},
+						"description": "Requires ADMIN role - deletes a test case"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Problem Service - User Attempts (Should Fail)",
+			"item": [
+				{
+					"name": "Create Problem (User - FORBIDDEN)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Unauthorized Problem\",\n  \"difficulty\": \"EASY\",\n  \"description\": \"This should fail with 403 Forbidden because user does not have ADMIN role\",\n  \"exampleInput\": \"test\",\n  \"exampleOutput\": \"test\",\n  \"testCases\": [\n    {\n      \"input\": \"test\",\n      \"expectedOutput\": \"test\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/problems",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"problems"
+							]
+						},
+						"description": "This should return 403 Forbidden - regular users cannot create problems"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Problem (User - FORBIDDEN)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/problems/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"problems",
+								"1"
+							]
+						},
+						"description": "This should return 403 Forbidden - regular users cannot delete problems"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

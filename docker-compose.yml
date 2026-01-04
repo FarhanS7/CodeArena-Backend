@@ -1,6 +1,7 @@
 version: "3.9"
 
 services:
+  # Auth Database
   auth-db:
     image: postgres:15
     container_name: auth_db
@@ -16,11 +17,29 @@ services:
     networks:
       - judge_network
 
+  # Execution Database
+  execution-db:
+    image: postgres:15
+    container_name: execution_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: execution_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - execution_data:/var/lib/postgresql/data
+    networks:
+      - judge_network
+
+  # Auth Service (NestJS)
   auth-service:
     build: ./auth-service
+    container_name: auth_service
     restart: always
     env_file:
-      - ./auth-service/.env
+      - ./auth-service/.env.local
     ports:
       - "3001:3001"
     depends_on:
@@ -28,8 +47,33 @@ services:
     networks:
       - judge_network
 
+  # Execution Service (NestJS)
+  execution-service:
+    build: ./execution-service
+    container_name: execution_service
+    restart: always
+    environment:
+      PORT: 8081
+      DB_HOST: execution-db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: execution_db
+      PROBLEM_SERVICE_URL: http://host.docker.internal:8080
+      JWT_SECRET: your-secret-key-change-this-in-production
+      JUDGE0_URL: https://judge0-ce.p.rapidapi.com
+      JUDGE0_API_KEY: ${JUDGE0_API_KEY}
+    ports:
+      - "8081:8081"
+    depends_on:
+      - execution-db
+    networks:
+      - judge_network
+
 networks:
   judge_network:
+    driver: bridge
 
 volumes:
   auth_data:
+  execution_data:

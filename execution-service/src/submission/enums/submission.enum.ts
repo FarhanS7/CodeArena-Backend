@@ -1,0 +1,21 @@
+export enum SubmissionStatus {
+  PENDING = 'PENDING',
+  QUEUED = 'QUEUED',
+  PROCESSING = 'PROCESSING',
+  ACCEPTED = 'ACCEPTED',
+  WRONG_ANSWER = 'WRONG_ANSWER',
+  TIME_LIMIT_EXCEEDED = 'TIME_LIMIT_EXCEEDED',
+  MEMORY_LIMIT_EXCEEDED = 'MEMORY_LIMIT_EXCEEDED',
+  RUNTIME_ERROR = 'RUNTIME_ERROR',
+  COMPILATION_ERROR = 'COMPILATION_ERROR',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
+}
+
+export enum ProgrammingLanguage {
+  JAVASCRIPT = 'javascript',
+  PYTHON = 'python',
+  JAVA = 'java',
+  CPP = 'cpp',
+  C = 'c',
+  TYPESCRIPT = 'typescript',
+}
