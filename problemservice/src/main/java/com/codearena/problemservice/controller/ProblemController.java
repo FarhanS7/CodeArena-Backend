@@ -23,6 +23,8 @@ import jakarta.validation.Valid;
 @Tag(name = "Problems", description = "Problem CRUD & Search API")
 @RestController
 @RequestMapping("/problems")
+@org.springframework.web.bind.annotation.CrossOrigin(origins = "*")
+@lombok.extern.slf4j.Slf4j
 public class ProblemController {
 
     private final ProblemService problemService;
@@ -83,6 +85,7 @@ public class ProblemController {
 )
     @GetMapping("/{id}")
     public ApiResponse getProblem(@PathVariable Long id) {
+        log.info("Received request for problem ID: {}", id);
         return ApiResponse.success(problemService.getProblemById(id));
     }
 

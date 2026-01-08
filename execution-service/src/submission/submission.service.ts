@@ -1,4 +1,8 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+    Injectable,
+    Logger,
+    NotFoundException
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { Repository } from 'typeorm';
@@ -47,7 +51,7 @@ export class SubmissionService {
     return savedSubmission;
   }
 
-  async findAll(userId?: number, problemId?: number): Promise<Submission[]> {
+  async findAll(userId?: string, problemId?: number): Promise<Submission[]> {
     const where: any = {};
     if (userId) where.userId = userId;
     if (problemId) where.problemId = problemId;
@@ -70,7 +74,7 @@ export class SubmissionService {
     return submission;
   }
 
-  async findByUser(userId: number): Promise<Submission[]> {
+  async findByUser(userId: string): Promise<Submission[]> {
     return this.submissionRepository.find({
       where: { userId },
       order: { createdAt: 'DESC' },
@@ -85,6 +89,7 @@ export class SubmissionService {
   }
 
   private async processSubmission(submissionId: number): Promise<void> {
+    this.logger.log(`Starting processing for submission: ${submissionId}`);
     try {
       // Update status to PROCESSING
       await this.submissionRepository.update(submissionId, {
@@ -166,6 +171,7 @@ export class SubmissionService {
   }
 
   private async fetchProblem(problemId: number): Promise<Problem> {
+    this.logger.log(`Fetching problem data for ID: ${problemId} from ${this.problemServiceUrl}`);
     try {
       const response = await axios.get(
         `${this.problemServiceUrl}/problems/${problemId}`,
@@ -177,7 +183,7 @@ export class SubmissionService {
     }
   }
 
-  async getUserStats(userId: number): Promise<{
+  async getUserStats(userId: string): Promise<{
     totalSubmissions: number;
     acceptedSubmissions: number;
     acceptanceRate: number;

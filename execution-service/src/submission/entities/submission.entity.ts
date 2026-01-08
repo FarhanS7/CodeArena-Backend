@@ -7,13 +7,14 @@ import {
 } from 'typeorm';
 import { ProgrammingLanguage, SubmissionStatus } from '../enums/submission.enum';
 
+// Triggering sync after table drop
 @Entity('submissions')
 export class Submission {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ name: 'user_id' })
-  userId: number;
+  userId: string;
 
   @Column({ name: 'problem_id' })
   problemId: number;

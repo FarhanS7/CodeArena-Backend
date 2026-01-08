@@ -2,11 +2,11 @@ import {
     Body,
     Controller,
     Get,
+    Logger,
     Param,
     ParseIntPipe,
     Post,
-    Query,
-    ValidationPipe
+    Query
 } from '@nestjs/common';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
 import { Submission } from './entities/submission.entity';
@@ -14,16 +14,18 @@ import { SubmissionService } from './submission.service';
 
 @Controller('submissions')
 export class SubmissionController {
+  private readonly logger = new Logger(SubmissionController.name);
   constructor(private readonly submissionService: SubmissionService) {}
 
   @Post()
   async create(
-    @Body(ValidationPipe) createSubmissionDto: CreateSubmissionDto,
+    @Body() createSubmissionDto: CreateSubmissionDto,
   ): Promise<{
     success: boolean;
     data: Submission;
     message: string;
   }> {
+    this.logger.log(`Received submission request: ${JSON.stringify(createSubmissionDto)}`);
     const submission = await this.submissionService.create(createSubmissionDto);
     return {
       success: true,
@@ -41,7 +43,7 @@ export class SubmissionController {
     data: Submission[];
   }> {
     const submissions = await this.submissionService.findAll(
-      userId ? parseInt(userId) : undefined,
+      userId,
       problemId ? parseInt(problemId) : undefined,
     );
     return {
@@ -52,7 +54,7 @@ export class SubmissionController {
 
   @Get('user/:userId')
   async findByUser(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Param('userId') userId: string,
   ): Promise<{
     success: boolean;
     data: Submission[];
@@ -66,7 +68,7 @@ export class SubmissionController {
 
   @Get('user/:userId/stats')
   async getUserStats(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Param('userId') userId: string,
   ): Promise<{
     success: boolean;
     data: {

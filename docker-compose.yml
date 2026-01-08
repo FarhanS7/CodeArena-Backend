@@ -53,20 +53,72 @@ services:
     container_name: execution_service
     restart: always
     environment:
-      PORT: 8081
+      PORT: 3002
       DB_HOST: execution-db
       DB_PORT: 5432
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       DB_DATABASE: execution_db
-      PROBLEM_SERVICE_URL: http://host.docker.internal:8080
+      PROBLEM_SERVICE_URL: http://problemservice:8080
       JWT_SECRET: your-secret-key-change-this-in-production
       JUDGE0_URL: https://judge0-ce.p.rapidapi.com
       JUDGE0_API_KEY: ${JUDGE0_API_KEY}
     ports:
-      - "8081:8081"
+      - "3002:3002"
     depends_on:
       - execution-db
+    networks:
+      - judge_network
+
+  # Problem Database
+  problem-db:
+    image: postgres:15
+    container_name: problem_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: problem_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - problem_data:/var/lib/postgresql/data
+    networks:
+      - judge_network
+
+  # Problem Service (Java/Spring Boot)
+  problemservice:
+    build: ./problemservice
+    container_name: problemservice
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://problem-db:5432/problem_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8080:8080"
+    depends_on:
+      - problem-db
+    networks:
+      - judge_network
+
+  # API Gateway (NestJS)
+  api-gateway:
+    build: ./api-gateway
+    container_name: api_gateway
+    restart: always
+    environment:
+      PORT: 3000
+      AUTH_SERVICE_URL: http://auth-service:3001
+      PROBLEM_SERVICE_URL: http://problemservice:8080
+      EXECUTION_SERVICE_URL: http://execution-service:3002
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      - execution-service
+      - problemservice
     networks:
       - judge_network
 
@@ -77,3 +129,4 @@ networks:
 volumes:
   auth_data:
   execution_data:
+  problem_data:
