@@ -1,8 +1,9 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthModule } from "./auth/auth.module";
+import { RequestContextMiddleware } from "./common/middleware/request-context.middleware";
 import envConfig from "./config/env.config";
 import { ormconfig } from "./config/ormconfig";
 import { UserModule } from "./user/user.module";
@@ -23,4 +24,8 @@ import { UserModule } from "./user/user.module";
     AuthModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestContextMiddleware).forRoutes("*");
+  }
+}

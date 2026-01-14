@@ -1,10 +1,15 @@
 import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+    Column,
+    CreateDateColumn,
+    Entity,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
 } from "typeorm";
+
+export enum Role {
+  USER = "USER",
+  ADMIN = "ADMIN",
+}
 
 @Entity()
 export class User {
@@ -23,8 +28,17 @@ export class User {
   @Column({ nullable: true })
   refreshTokenHash: string | null;
 
-  @Column({ default: "USER" })
-  role: string;
+  @Column({ type: "enum", enum: Role, default: Role.USER })
+  role: Role;
+
+  @Column({ nullable: true })
+  bio: string;
+
+  @Column({ nullable: true })
+  avatarUrl: string;
+
+  @Column({ type: "json", nullable: true })
+  socialLinks: { github?: string; twitter?: string; linkedIn?: string };
 
   @CreateDateColumn()
   createdAt: Date;

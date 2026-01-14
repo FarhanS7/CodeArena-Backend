@@ -1,4 +1,5 @@
 import { Controller, Param, Patch } from '@nestjs/common';
+import { Role } from './user.entity';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -7,7 +8,6 @@ export class UserController {
 
   /**
    * DEVELOPMENT ONLY: Promote a user to ADMIN role
-   * In production, this should be protected or removed
    */
   @Patch(':id/promote-admin')
   async promoteToAdmin(@Param('id') userId: string) {
@@ -16,7 +16,7 @@ export class UserController {
       throw new Error('User not found');
     }
 
-    user.role = 'ADMIN';
+    user.role = Role.ADMIN;
     await this.userService.updateUser(user);
 
     return {
