@@ -1,0 +1,2 @@
+﻿src/app.module.ts(1,10): error TS2724: '"@nestjs-modules/ioredis"' has no exported member named 'IoRedisModule'. Did you mean 'RedisModule'?
+src/score/score.processor.ts(13,39): error TS1272: A type referenced in a decorated signature must be imported with 'import type' or a namespace import when 'isolatedModules' and 'emitDecoratorMetadata' are enabled.

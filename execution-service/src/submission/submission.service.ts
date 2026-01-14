@@ -1,3 +1,4 @@
+import { InjectQueue } from '@nestjs/bull';
 import {
     Injectable,
     Logger,
@@ -5,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
+import { Queue } from 'bull';
 import { Repository } from 'typeorm';
 import { Judge0Service } from '../judge0/judge0.service';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
@@ -19,6 +21,7 @@ interface TestCase {
 interface Problem {
   id: number;
   title: string;
+  difficulty: string;
   testCases: TestCase[];
 }
 
@@ -31,6 +34,8 @@ export class SubmissionService {
     @InjectRepository(Submission)
     private submissionRepository: Repository<Submission>,
     private judge0Service: Judge0Service,
+    @InjectQueue('leaderboard-queue')
+    private leaderboardQueue: Queue,
   ) {
     this.problemServiceUrl = process.env.PROBLEM_SERVICE_URL || 'http://localhost:8080';
   }
@@ -161,6 +166,17 @@ export class SubmissionService {
       this.logger.log(
         `Submission ${submissionId} processed: ${finalStatus} (${executionResult.passed}/${executionResult.total})`,
       );
+
+      // If accepted, emit event for leaderboard
+      if (finalStatus === SubmissionStatus.ACCEPTED) {
+        await this.leaderboardQueue.add('submission.accepted', {
+          userId: submission.userId,
+          problemId: submission.problemId,
+          difficulty: problem.difficulty,
+          submissionId: submission.id,
+        });
+        this.logger.log(`Emitted submission.accepted event for submission ${submissionId}`);
+      }
     } catch (error) {
       this.logger.error(`Error processing submission ${submissionId}:`, error);
       await this.submissionRepository.update(submissionId, {

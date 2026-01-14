@@ -103,6 +103,16 @@ services:
     networks:
       - judge_network
 
+  # Redis (for Bull MQ and Leaderboard)
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - judge_network
+
   # API Gateway (NestJS)
   api-gateway:
     build: ./api-gateway
@@ -113,12 +123,51 @@ services:
       AUTH_SERVICE_URL: http://auth-service:3001
       PROBLEM_SERVICE_URL: http://problemservice:8080
       EXECUTION_SERVICE_URL: http://execution-service:3002
+      LEADERBOARD_SERVICE_URL: http://leaderboard-service:3003
     ports:
       - "3000:3000"
     depends_on:
       - auth-service
       - execution-service
       - problemservice
+    networks:
+      - judge_network
+
+  # Leaderboard Database
+  leaderboard-db:
+    image: postgres:15
+    container_name: leaderboard_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: leaderboard_db
+    ports:
+      - "5436:5432"
+    volumes:
+      - leaderboard_data:/var/lib/postgresql/data
+    networks:
+      - judge_network
+
+  # Leaderboard Service (NestJS)
+  leaderboard-service:
+    build: ./leaderboard-service
+    container_name: leaderboard_service
+    restart: always
+    environment:
+      PORT: 3003
+      DB_HOST: leaderboard-db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: leaderboard_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "3003:3003"
+    depends_on:
+      - leaderboard-db
+      - redis
     networks:
       - judge_network
 
@@ -130,3 +179,4 @@ volumes:
   auth_data:
   execution_data:
   problem_data:
+  leaderboard_data:

@@ -7,6 +7,10 @@ export default () => ({
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_DATABASE || 'execution_db',
   },
+  redis: {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379', 10),
+  },
   judge0: {
     url: process.env.JUDGE0_URL || 'https://judge0-ce.p.rapidapi.com',
     apiKey: process.env.JUDGE0_API_KEY || '',

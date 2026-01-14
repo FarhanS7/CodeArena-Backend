@@ -16,6 +16,7 @@ export class AppModule implements NestModule {
     const authServiceUrl = this.configService.get<string>('AUTH_SERVICE_URL', 'http://localhost:3001');
     const problemServiceUrl = this.configService.get<string>('PROBLEM_SERVICE_URL', 'http://localhost:8080');
     const executionServiceUrl = this.configService.get<string>('EXECUTION_SERVICE_URL', 'http://localhost:3002');
+    const leaderboardServiceUrl = this.configService.get<string>('LEADERBOARD_SERVICE_URL', 'http://localhost:3003');
 
     // Proxy Auth Service
     consumer
@@ -43,5 +44,14 @@ export class AppModule implements NestModule {
         }
       }))
       .forRoutes('submissions');
+
+    // Proxy Leaderboard Service
+    consumer
+      .apply(proxy(leaderboardServiceUrl, {
+        proxyReqPathResolver: (req) => {
+          return req.url;
+        }
+      }))
+      .forRoutes('leaderboard');
   }
 }
