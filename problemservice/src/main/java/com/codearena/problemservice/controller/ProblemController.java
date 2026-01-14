@@ -64,16 +64,20 @@ public class ProblemController {
         return ApiResponse.success(created);
     }
 
-    // -------------------------
-    // GET ALL PROBLEMS
-    // -------------------------
-@Operation(
-    summary = "Get all problems",
-    description = "Returns a list of all public coding problems"
-)
+    // -----------------------
+    // GET ALL PROBLEMS (PAGINATED)
+    // -----------------------
+    @Operation(
+        summary = "Get all problems (paginated)",
+        description = "Returns a paginated list of all public coding problems"
+    )
     @GetMapping
-    public ApiResponse getAllProblems() {
-        return ApiResponse.success(problemService.getAllProblems());
+    public ApiResponse getAllProblems(
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "10") int size
+    ) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        return ApiResponse.success(problemService.getAllProblems(pageable));
     }
 
     // -------------------------

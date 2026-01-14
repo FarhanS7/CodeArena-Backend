@@ -49,10 +49,10 @@ public class ProblemService {
     }
 
     // -----------------------
-    // GET ALL PROBLEMS
+    // GET ALL PROBLEMS (PAGINATED)
     // -----------------------
-    public List<Problem> getAllProblems() {
-        return problemRepository.findAll();
+    public org.springframework.data.domain.Page<Problem> getAllProblems(org.springframework.data.domain.Pageable pageable) {
+        return problemRepository.findAll(pageable);
     }
 
     // -----------------------
