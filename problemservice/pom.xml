@@ -122,6 +122,11 @@
 			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.meilisearch.sdk</groupId>
+			<artifactId>meilisearch-java</artifactId>
+			<version>0.18.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
