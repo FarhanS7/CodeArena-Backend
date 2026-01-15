@@ -1,5 +1,6 @@
 import { InjectQueue } from '@nestjs/bull';
 import {
+    Inject,
     Injectable,
     Logger,
     NotFoundException
@@ -7,6 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { Queue } from 'bull';
+import Redis from 'ioredis';
 import { Repository } from 'typeorm';
 import { Judge0Service } from '../judge0/judge0.service';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
@@ -36,8 +38,25 @@ export class SubmissionService {
     private judge0Service: Judge0Service,
     @InjectQueue('leaderboard-queue')
     private leaderboardQueue: Queue,
+    @Inject('REDIS_PUBLISHER')
+    private redisPublisher: Redis,
   ) {
     this.problemServiceUrl = process.env.PROBLEM_SERVICE_URL || 'http://localhost:8080';
+  }
+
+  private async publishStatusUpdate(submission: Submission) {
+    const message = {
+      id: submission.id,
+      userId: submission.userId,
+      problemId: submission.problemId,
+      status: submission.status,
+      testCasesPassed: submission.testCasesPassed,
+      totalTestCases: submission.totalTestCases,
+      executionTime: submission.executionTime,
+      memoryUsed: submission.memoryUsed,
+      errorMessage: submission.errorMessage,
+    };
+    await this.redisPublisher.publish('submission-verdicts', JSON.stringify(message));
   }
 
   async create(createSubmissionDto: CreateSubmissionDto): Promise<Submission> {
@@ -47,6 +66,9 @@ export class SubmissionService {
     });
 
     const savedSubmission = await this.submissionRepository.save(submission);
+
+    // Publish initial status
+    await this.publishStatusUpdate(savedSubmission);
 
     // Process submission asynchronously
     this.processSubmission(savedSubmission.id).catch((error) => {
@@ -100,6 +122,7 @@ export class SubmissionService {
       await this.submissionRepository.update(submissionId, {
         status: SubmissionStatus.PROCESSING,
       });
+      await this.publishStatusUpdate({ id: submissionId, status: SubmissionStatus.PROCESSING } as any);
 
       const submission = await this.findOne(submissionId);
 
@@ -162,6 +185,10 @@ export class SubmissionService {
         testResults: executionResult.results as any,
         errorMessage: errorMessage || undefined,
       });
+
+      // Fetch the updated submission to publish final result
+      const updatedSubmission = await this.findOne(submissionId);
+      await this.publishStatusUpdate(updatedSubmission);
 
       this.logger.log(
         `Submission ${submissionId} processed: ${finalStatus} (${executionResult.passed}/${executionResult.total})`,

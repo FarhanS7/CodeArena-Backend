@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
+import { RedisModule } from './common/redis/redis.module';
 import envConfig from './config/env.config';
 import { ormConfig } from './config/ormconfig';
 import { SubmissionModule } from './submission/submission.module';
@@ -27,6 +28,7 @@ import { SubmissionModule } from './submission/submission.module';
       inject: [ConfigService],
     }),
     SubmissionModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
