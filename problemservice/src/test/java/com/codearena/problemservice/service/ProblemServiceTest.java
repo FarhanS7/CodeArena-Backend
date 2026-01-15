@@ -28,13 +28,15 @@ class ProblemServiceTest {
 
     private ProblemRepository problemRepository;
     private TestCaseRepository testCaseRepository;
+    private SearchService searchService;
     private ProblemService problemService;
 
     @BeforeEach
     void setUp() {
         problemRepository = mock(ProblemRepository.class);
         testCaseRepository = mock(TestCaseRepository.class);
-        problemService = new ProblemService(problemRepository, testCaseRepository);
+        searchService = mock(SearchService.class);
+        problemService = new ProblemService(problemRepository, testCaseRepository, searchService);
     }
 
     @Test
@@ -61,6 +63,7 @@ class ProblemServiceTest {
         verify(problemRepository).existsByTitle("Two Sum");
         verify(problemRepository).save(any(Problem.class));
         verify(testCaseRepository).save(any(TestCase.class));
+        verify(searchService).indexProblem(any(Problem.class));
     }
 
     @Test
@@ -111,6 +114,7 @@ class ProblemServiceTest {
 
         verify(testCaseRepository).deleteAll(problem.getTestCases());
         verify(problemRepository).deleteById(1L);
+        verify(searchService).deleteProblem(1L);
     }
 
     @Test
@@ -136,6 +140,7 @@ class ProblemServiceTest {
         assertThat(updated.getDifficulty()).isEqualTo(Difficulty.MEDIUM);
         assertThat(updated.getDescription()).isEqualTo("New description");
         verify(testCaseRepository, never()).delete(any());
+        verify(searchService).indexProblem(any(Problem.class));
     }
 
     @Test

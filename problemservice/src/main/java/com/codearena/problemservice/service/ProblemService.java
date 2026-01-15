@@ -18,11 +18,14 @@ public class ProblemService {
 
     private final ProblemRepository problemRepository;
     private final TestCaseRepository testCaseRepository;
+    private final SearchService searchService;
 
     public ProblemService(ProblemRepository problemRepository,
-                          TestCaseRepository testCaseRepository) {
+                          TestCaseRepository testCaseRepository,
+                          SearchService searchService) {
         this.problemRepository = problemRepository;
         this.testCaseRepository = testCaseRepository;
+        this.searchService = searchService;
     }
 
     // -----------------------
@@ -44,6 +47,9 @@ public class ProblemService {
             testCase.setProblem(savedProblem);
             testCaseRepository.save(testCase);
         }
+
+        // 4. Index in search
+        searchService.indexProblem(savedProblem);
 
         return savedProblem;
     }
@@ -75,6 +81,9 @@ public class ProblemService {
 
         // Delete problem
         problemRepository.deleteById(id);
+
+        // 3. Delete from search
+        searchService.deleteProblem(id);
     }
 
     // -----------------------
@@ -143,7 +152,12 @@ public class ProblemService {
             }
         }
 
-        return problemRepository.save(problem);
+        Problem updated = problemRepository.save(problem);
+        
+        // 7. Update search index
+        searchService.indexProblem(updated);
+
+        return updated;
     }
 
     // -----------------------------------
@@ -170,5 +184,9 @@ public class ProblemService {
     @Transactional
     public void deleteTestCase(Long testCaseId) {
         testCaseRepository.deleteById(testCaseId);
+    }
+
+    public Object searchProblems(String query) {
+        return searchService.searchProblems(query);
     }
 }

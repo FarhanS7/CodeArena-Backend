@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codearena.problemservice.model.TestCase;
@@ -78,6 +79,15 @@ public class ProblemController {
     ) {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
         return ApiResponse.success(problemService.getAllProblems(pageable));
+    }
+
+    @Operation(
+        summary = "Search problems",
+        description = "Full-text search for problems using Meilisearch"
+    )
+    @GetMapping("/search")
+    public ApiResponse searchProblems(@RequestParam String q) {
+        return ApiResponse.success(problemService.searchProblems(q));
     }
 
     // -------------------------

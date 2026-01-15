@@ -14,6 +14,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -79,12 +81,12 @@ class ProblemControllerTest {
         p1.setDifficulty(Difficulty.EASY);
         p1.setDescription("desc");
 
-        when(problemService.getAllProblems()).thenReturn(List.of(p1));
+        when(problemService.getAllProblems(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(p1)));
 
         mockMvc.perform(get("/problems"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success", is(true)))
-                .andExpect(jsonPath("$.data[0].title", is("Two Sum")));
+                .andExpect(jsonPath("$.data.content[0].title", is("Two Sum")));
     }
 
     @Test
