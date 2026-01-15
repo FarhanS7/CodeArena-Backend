@@ -1,9 +1,12 @@
+import { HttpModule } from '@nestjs/axios';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { TerminusModule } from '@nestjs/terminus';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import proxy from 'express-http-proxy';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
@@ -16,7 +19,10 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
         limit: 100,
       },
     ]),
+    TerminusModule,
+    HttpModule,
   ],
+  controllers: [HealthController],
   providers: [
     {
       provide: APP_GUARD,
@@ -33,6 +39,7 @@ export class AppModule implements NestModule {
     const executionServiceUrl = this.configService.get<string>('EXECUTION_SERVICE_URL', 'http://localhost:3002');
     const leaderboardServiceUrl = this.configService.get<string>('LEADERBOARD_SERVICE_URL', 'http://localhost:3003');
     const discussionServiceUrl = this.configService.get<string>('DISCUSSION_SERVICE_URL', 'http://localhost:3004');
+    const aiServiceUrl = this.configService.get<string>('AI_SERVICE_URL', 'http://localhost:3006');
 
     // Apply Correlation ID Middleware to all routes
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');
@@ -70,5 +77,10 @@ export class AppModule implements NestModule {
     consumer
       .apply(proxy(discussionServiceUrl, proxyOptions))
       .forRoutes('discussions');
+
+    // Proxy AI Service
+    consumer
+      .apply(proxy(aiServiceUrl, proxyOptions))
+      .forRoutes('ai');
   }
 }
