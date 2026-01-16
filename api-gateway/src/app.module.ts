@@ -48,6 +48,10 @@ export class AppModule implements NestModule {
       proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
         // Forward the correlation ID header
         proxyReqOpts.headers['x-correlation-id'] = srcReq.headers['x-correlation-id'];
+        // Forward the Authorization header if present
+        if (srcReq.headers['authorization']) {
+          proxyReqOpts.headers['authorization'] = srcReq.headers['authorization'];
+        }
         return proxyReqOpts;
       },
       proxyReqPathResolver: (req) => req.url,

@@ -8,8 +8,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
         (request: Request) => {
-          return request?.cookies?.token; //  read JWT from HttpOnly cookie
+          return request?.cookies?.token; // Fallback to HttpOnly cookie
         },
       ]),
       ignoreExpiration: false,
