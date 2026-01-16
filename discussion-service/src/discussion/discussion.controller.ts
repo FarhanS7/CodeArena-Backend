@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { DiscussionService } from './discussion.service';
 
 @Controller('discussions')
@@ -6,6 +7,7 @@ export class DiscussionController {
   constructor(private readonly discussionService: DiscussionService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   create(@Body() data: any) {
     return this.discussionService.create(data);
   }
@@ -21,6 +23,7 @@ export class DiscussionController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string) {
     return this.discussionService.remove(id);
   }
