@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { DiscussionService } from './discussion.service';
 
@@ -8,8 +8,12 @@ export class DiscussionController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  create(@Body() data: any) {
-    return this.discussionService.create(data);
+  create(@Body() data: any, @Request() req: any) {
+    return this.discussionService.create({
+      ...data,
+      userId: req.user.id,
+      username: req.user.username,
+    });
   }
 
   @Get('problem/:problemId')
