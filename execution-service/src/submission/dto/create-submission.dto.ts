@@ -6,6 +6,10 @@ export class CreateSubmissionDto {
   @IsNotEmpty()
   userId: string;
 
+  @IsString()
+  @IsNotEmpty()
+  username: string;
+
   @IsNumber()
   @IsNotEmpty()
   problemId: number;

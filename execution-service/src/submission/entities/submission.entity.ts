@@ -16,6 +16,9 @@ export class Submission {
   @Column({ name: 'user_id' })
   userId: string;
 
+  @Column({ name: 'username', nullable: true })
+  username: string;
+
   @Column({ name: 'problem_id' })
   problemId: number;
 

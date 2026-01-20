@@ -12,10 +12,10 @@ export class ScoreProcessor {
   @Process('submission.accepted')
   async handleSubmissionAccepted(job: Job<any>) {
     this.logger.log(`Processing leaderboard update for job ${job.id}`);
-    const { userId, problemId, difficulty } = job.data;
+    const { userId, username, problemId, difficulty } = job.data;
     
     try {
-      await this.scoreService.updateScore(userId, problemId, difficulty);
+      await this.scoreService.updateScore(userId, problemId, difficulty, username);
       this.logger.log(`Leaderboard updated for user ${userId}`);
     } catch (error) {
       this.logger.error(`Failed to update leaderboard: ${error.message}`);

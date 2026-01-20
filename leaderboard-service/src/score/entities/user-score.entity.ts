@@ -14,6 +14,9 @@ export class UserScore {
   @Column({ unique: true, name: 'user_id' })
   userId: string;
 
+  @Column({ name: 'username', nullable: true })
+  username: string;
+
   @Column({ default: 0 })
   score: number;
 

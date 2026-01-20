@@ -198,6 +198,7 @@ export class SubmissionService {
       if (finalStatus === SubmissionStatus.ACCEPTED) {
         await this.leaderboardQueue.add('submission.accepted', {
           userId: submission.userId,
+          username: submission.username,
           problemId: submission.problemId,
           difficulty: problem.difficulty,
           submissionId: submission.id,

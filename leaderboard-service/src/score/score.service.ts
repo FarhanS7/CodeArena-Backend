@@ -10,13 +10,15 @@ export class ScoreService {
   private readonly logger = new Logger(ScoreService.name);
   private readonly GLOBAL_RANKING_KEY = 'leaderboard:global';
 
+  private readonly USERNAME_MAP_KEY = 'leaderboard:usernames';
+
   constructor(
     @InjectRepository(UserScore)
     private userScoreRepository: Repository<UserScore>,
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
-  async updateScore(userId: string, problemId: number, difficulty: string): Promise<void> {
+  async updateScore(userId: string, problemId: number, difficulty: string, username?: string): Promise<void> {
     this.logger.log(`Updating score for user ${userId} on problem ${problemId} (${difficulty})`);
     
     let userScore = await this.userScoreRepository.findOne({ where: { userId } });
@@ -24,10 +26,17 @@ export class ScoreService {
     if (!userScore) {
       userScore = this.userScoreRepository.create({
         userId,
+        username,
         score: 0,
         solvedCount: 0,
         solvedProblemIds: [],
       });
+    }
+
+    // Update username if provided and changed
+    if (username && userScore.username !== username) {
+      userScore.username = username;
+      await this.redis.hset(this.USERNAME_MAP_KEY, userId, username);
     }
 
     // Don't award points if problem was already solved by this user
@@ -45,6 +54,9 @@ export class ScoreService {
 
     // Update Redis for fast ranking
     await this.redis.zadd(this.GLOBAL_RANKING_KEY, userScore.score, userId);
+    if (userScore.username) {
+      await this.redis.hset(this.USERNAME_MAP_KEY, userId, userScore.username);
+    }
     
     this.logger.log(`Updated user ${userId} score to ${userScore.score}`);
   }
@@ -54,9 +66,14 @@ export class ScoreService {
     
     const rankings: any[] = [];
     for (let i = 0; i < topUsers.length; i += 2) {
+      const userId = topUsers[i];
+      const score = parseInt(topUsers[i + 1], 10);
+      const username = await this.redis.hget(this.USERNAME_MAP_KEY, userId);
+
       rankings.push({
-        userId: topUsers[i],
-        score: parseInt(topUsers[i + 1], 10),
+        userId,
+        username: username || 'Anonymous',
+        score,
         rank: Math.floor(i / 2) + 1,
       });
     }
