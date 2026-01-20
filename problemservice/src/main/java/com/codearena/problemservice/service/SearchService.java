@@ -12,7 +12,6 @@ import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.json.JacksonJsonHandler;
-import com.meilisearch.sdk.model.SearchResult;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -68,9 +67,9 @@ public class SearchService {
         }
     }
 
-    public SearchResult searchProblems(String query) {
+    public java.util.List<java.util.Map<String, Object>> searchProblems(String query) {
         try {
-            return client.index(indexName).search(query);
+            return client.index(indexName).search(query).getHits();
         } catch (Exception e) {
             throw new RuntimeException("Search failed: " + e.getMessage());
         }
