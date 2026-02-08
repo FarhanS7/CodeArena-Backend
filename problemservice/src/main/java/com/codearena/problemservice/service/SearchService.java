@@ -69,7 +69,7 @@ public class SearchService {
 
     public java.util.List<java.util.Map<String, Object>> searchProblems(String query) {
         try {
-            return client.index(indexName).search(query).getHits();
+            return (java.util.List<java.util.Map<String, Object>>) (java.util.List<?>) client.index(indexName).search(query).getHits();
         } catch (Exception e) {
             throw new RuntimeException("Search failed: " + e.getMessage());
         }

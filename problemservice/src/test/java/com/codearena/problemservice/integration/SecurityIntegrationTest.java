@@ -12,10 +12,10 @@ import java.util.Date;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.codearena.problemservice.BaseIntegrationTest;
 import com.codearena.problemservice.controller.ProblemRequest;
 import com.codearena.problemservice.controller.TestCaseRequest;
 import com.codearena.problemservice.problem.Difficulty;
@@ -23,9 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-@SpringBootTest
 @AutoConfigureMockMvc
-public class SecurityIntegrationTest {
+public class SecurityIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
