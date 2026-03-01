@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: auth_db
     ports:
-      - "5433:5432"
+      - "21000:5432"
     volumes:
       - auth_data:/var/lib/postgresql/data
     networks:
@@ -27,7 +27,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: execution_db
     ports:
-      - "5434:5432"
+      - "21001:5432"
     volumes:
       - execution_data:/var/lib/postgresql/data
     networks:
@@ -41,7 +41,7 @@ services:
     env_file:
       - ./auth-service/.env.local
     ports:
-      - "3001:3001"
+      - "20001:3100"
     depends_on:
       - auth-db
     networks:
@@ -59,12 +59,12 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       DB_DATABASE: execution_db
-      PROBLEM_SERVICE_URL: http://problemservice:8080
+      PROBLEM_SERVICE_URL: http://problem-service:8080
       JWT_SECRET: your-secret-key-change-this-in-production
       JUDGE0_URL: https://judge0-ce.p.rapidapi.com
       JUDGE0_API_KEY: ${JUDGE0_API_KEY}
     ports:
-      - "3002:3002"
+      - "20002:3002"
     depends_on:
       - execution-db
     networks:
@@ -80,15 +80,15 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: problem_db
     ports:
-      - "5435:5432"
+      - "21002:5432"
     volumes:
       - problem_data:/var/lib/postgresql/data
     networks:
       - judge_network
 
   # Problem Service (Java/Spring Boot)
-  problemservice:
-    build: ./problemservice
+  problem-service:
+    build: ./problem-service
     container_name: problemservice
     restart: always
     environment:
@@ -97,7 +97,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     ports:
-      - "8080:8080"
+      - "20003:8080"
     depends_on:
       - problem-db
     networks:
@@ -109,7 +109,7 @@ services:
     container_name: redis
     restart: always
     ports:
-      - "6379:6379"
+      - "21005:6379"
     networks:
       - judge_network
 
@@ -120,16 +120,17 @@ services:
     restart: always
     environment:
       PORT: 3000
-      AUTH_SERVICE_URL: http://auth-service:3001
-      PROBLEM_SERVICE_URL: http://problemservice:8080
+      AUTH_SERVICE_URL: http://auth-service:3100
+      PROBLEM_SERVICE_URL: http://problem-service:8080
       EXECUTION_SERVICE_URL: http://execution-service:3002
       LEADERBOARD_SERVICE_URL: http://leaderboard-service:3003
+      AI_SERVICE_URL: http://ai-service:3006
     ports:
-      - "3000:3000"
+      - "20000:3000"
     depends_on:
       - auth-service
       - execution-service
-      - problemservice
+      - problem-service
     networks:
       - judge_network
 
@@ -143,7 +144,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: leaderboard_db
     ports:
-      - "5436:5432"
+      - "21003:5432"
     volumes:
       - leaderboard_data:/var/lib/postgresql/data
     networks:
@@ -164,7 +165,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
     ports:
-      - "3003:3003"
+      - "20004:3003"
     depends_on:
       - leaderboard-db
       - redis
@@ -181,7 +182,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: discussion_db
     ports:
-      - "5437:5432"
+      - "21004:5432"
     volumes:
       - discussion_data:/var/lib/postgresql/data
     networks:
@@ -200,9 +201,56 @@ services:
       DB_PASSWORD: postgres
       DB_DATABASE: discussion_db
     ports:
-      - "3004:3004"
+      - "20005:3004"
     depends_on:
       - discussion-db
+    networks:
+      - judge_network
+
+  # Real-time Service (NestJS)
+  realtime-service:
+    build: ./realtime-service
+    container_name: realtime_service
+    restart: always
+    environment:
+      PORT: 3005
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "20006:3005"
+    depends_on:
+      - redis
+    networks:
+      - judge_network
+
+  # Meilisearch
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: meilisearch
+    restart: always
+    environment:
+      MEILI_MASTER_KEY: masterKey123
+      MEILI_NO_ANALYTICS: "true"
+    ports:
+      - "21006:7700"
+    volumes:
+      - meili_data:/meili_data
+    networks:
+      - judge_network
+
+  # AI Service (NestJS)
+  ai-service:
+    build: ./ai-service
+    container_name: ai_service
+    restart: always
+    environment:
+      PORT: 3006
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      PROBLEM_SERVICE_URL: http://problem-service:8080
+    ports:
+      - "20007:3006"
+    depends_on:
+      - problem-service
     networks:
       - judge_network
 
@@ -216,3 +264,4 @@ volumes:
   problem_data:
   leaderboard_data:
   discussion_data:
+  meili_data:

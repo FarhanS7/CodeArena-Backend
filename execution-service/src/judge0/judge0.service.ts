@@ -56,6 +56,16 @@ export class Judge0Service {
         throw new Error(`Unsupported language: ${language}`);
       }
 
+      // Prepare headers
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (this.judge0Url.includes('rapidapi.com')) {
+        headers['X-RapidAPI-Key'] = this.judge0ApiKey;
+        headers['X-RapidAPI-Host'] = 'judge0-ce.p.rapidapi.com';
+      }
+
       // Create submission
       const submissionResponse = await axios.post(
         `${this.judge0Url}/submissions?base64_encoded=false&wait=true`,
@@ -66,13 +76,7 @@ export class Judge0Service {
           cpu_time_limit: timeLimit,
           memory_limit: memoryLimit,
         },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'X-RapidAPI-Key': this.judge0ApiKey,
-            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-          },
-        },
+        { headers },
       );
 
       const result: Judge0Response = submissionResponse.data;
