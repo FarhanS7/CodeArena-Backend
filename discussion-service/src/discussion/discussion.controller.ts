@@ -5,6 +5,11 @@ import { DiscussionService } from './discussion.service';
 @Controller('discussions')
 export class DiscussionController {
   constructor(private readonly discussionService: DiscussionService) {}
+  
+  @Get()
+  findAll() {
+    return this.discussionService.findAll();
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard)

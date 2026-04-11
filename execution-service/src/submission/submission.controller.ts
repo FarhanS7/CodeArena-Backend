@@ -38,6 +38,7 @@ export class SubmissionController {
   async findAll(
     @Query('userId') userId?: string,
     @Query('problemId') problemId?: string,
+    @Query('status') status?: string,
   ): Promise<{
     success: boolean;
     data: Submission[];
@@ -45,6 +46,7 @@ export class SubmissionController {
     const submissions = await this.submissionService.findAll(
       userId,
       problemId ? parseInt(problemId) : undefined,
+      status as any,
     );
     return {
       success: true,

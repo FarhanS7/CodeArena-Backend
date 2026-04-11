@@ -122,6 +122,7 @@ services:
       PROBLEM_SERVICE_URL: http://problem-service:8080
       EXECUTION_SERVICE_URL: http://execution-service:3002
       LEADERBOARD_SERVICE_URL: http://leaderboard-service:3003
+      CONTEST_SERVICE_URL: http://contest-service:3008
       AI_SERVICE_URL: http://ai-service:3006
     ports:
       - "20000:3000"
@@ -252,6 +253,47 @@ services:
     networks:
       - judge_network
 
+  # Contest Database
+  contest-db:
+    image: postgres:15
+    container_name: contest_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: contest_db
+    ports:
+      - "21007:5432"
+    volumes:
+      - contest_data:/var/lib/postgresql/data
+    networks:
+      - judge_network
+
+  # Contest Service (NestJS)
+  contest-service:
+    build: ./contest-service
+    container_name: contest_service
+    restart: always
+    environment:
+      PORT: 3008
+      DB_HOST: contest-db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: contest_db
+      JWT_SECRET: your-secret-key-change-this-in-production
+      AUTH_SERVICE_URL: http://auth-service:3100
+      PROBLEM_SERVICE_URL: http://problem-service:8080
+      EXECUTION_SERVICE_URL: http://execution-service:3002
+    ports:
+      - "20008:3008"
+    depends_on:
+      - contest-db
+      - auth-service
+      - problem-service
+    networks:
+      - judge_network
+
 networks:
   judge_network:
     driver: bridge
@@ -262,4 +304,5 @@ volumes:
   problem_data:
   leaderboard_data:
   discussion_data:
+  contest_data:
   meili_data:

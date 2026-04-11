@@ -53,8 +53,29 @@ export class Submission {
   @Column({ type: 'text', nullable: true, name: 'error_message' })
   errorMessage: string;
 
+  @Column({ type: 'text', nullable: true, name: 'compilation_error' })
+  compilationError: string;
+
+  @Column({ type: 'text', nullable: true, name: 'runtime_error' })
+  runtimeError: string;
+
   @Column({ type: 'jsonb', nullable: true, name: 'test_results' })
-  testResults: any[];
+  testResults: {
+    totalTests: number;
+    passedTests: number;
+    testCases: Array<{
+      id: number;
+      input?: string;
+      expectedOutput?: string;
+      actualOutput?: string;
+      status: 'PASSED' | 'FAILED' | 'RUNTIME_ERROR' | 'TIME_LIMIT_EXCEEDED' | 'MEMORY_LIMIT_EXCEEDED' | 'COMPILATION_ERROR';
+      time: number; // milliseconds
+      memory: number; // KB
+      errorMessage?: string;
+      timeLimit?: number;
+      memoryLimit?: number;
+    }>;
+  };
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

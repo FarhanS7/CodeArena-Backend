@@ -46,7 +46,7 @@ export class SubmissionService {
 
   private async publishStatusUpdate(submission: Submission) {
     const message = {
-      id: submission.id,
+      submissionId: submission.id,
       userId: submission.userId,
       problemId: submission.problemId,
       status: submission.status,
@@ -55,6 +55,10 @@ export class SubmissionService {
       executionTime: submission.executionTime,
       memoryUsed: submission.memoryUsed,
       errorMessage: submission.errorMessage,
+      testResults: submission.testResults,
+      compilationError: submission.compilationError,
+      runtimeError: submission.runtimeError,
+      timestamp: new Date().toISOString(),
     };
     await this.redisPublisher.publish('submission-verdicts', JSON.stringify(message));
   }
@@ -78,10 +82,11 @@ export class SubmissionService {
     return savedSubmission;
   }
 
-  async findAll(userId?: string, problemId?: number): Promise<Submission[]> {
+  async findAll(userId?: string, problemId?: number, status?: SubmissionStatus): Promise<Submission[]> {
     const where: any = {};
     if (userId) where.userId = userId;
     if (problemId) where.problemId = problemId;
+    if (status) where.status = status;
 
     return this.submissionRepository.find({
       where,
@@ -137,65 +142,46 @@ export class SubmissionService {
         return;
       }
 
-      // Execute code against all test cases
+      // Execute code against all test cases with detailed verdict tracking
       const executionResult = await this.judge0Service.batchExecute(
         submission.sourceCode,
         submission.language,
         problem.testCases,
       );
 
-      // Determine final status
-      let finalStatus: SubmissionStatus;
-      let errorMessage: string | null = null;
+      // Calculate aggregate metrics
+      const totalTime =
+        executionResult.testResults.testCases.reduce((sum, tc) => sum + tc.time, 0) /
+        executionResult.testResults.testCases.length;
+      const maxMemory = Math.max(
+        ...executionResult.testResults.testCases.map((tc) => tc.memory),
+      );
 
-      // Check for errors in any test case
-      const hasError = executionResult.results.some((r) => r.error);
-      if (hasError) {
-        const firstError = executionResult.results.find((r) => r.error);
-        errorMessage = firstError?.error || 'Unknown error';
-
-        if (errorMessage.includes('Time Limit Exceeded')) {
-          finalStatus = SubmissionStatus.TIME_LIMIT_EXCEEDED;
-        } else if (errorMessage.includes('Memory Limit Exceeded')) {
-          finalStatus = SubmissionStatus.MEMORY_LIMIT_EXCEEDED;
-        } else if (errorMessage.includes('Compilation')) {
-          finalStatus = SubmissionStatus.COMPILATION_ERROR;
-        } else {
-          finalStatus = SubmissionStatus.RUNTIME_ERROR;
-        }
-      } else if (executionResult.passed === executionResult.total) {
-        finalStatus = SubmissionStatus.ACCEPTED;
-      } else {
-        finalStatus = SubmissionStatus.WRONG_ANSWER;
-      }
-
-      // Calculate avg execution time and memory
-      const avgTime =
-        executionResult.results.reduce((sum, r) => sum + r.time, 0) /
-        executionResult.results.length;
-      const maxMemory = Math.max(...executionResult.results.map((r) => r.memory));
-
-      // Update submission with results
-      await this.submissionRepository.update(submissionId, {
-        status: finalStatus,
+      // Update submission with detailed results
+      const updateData: Partial<Submission> = {
+        status: executionResult.submissionStatus,
         testCasesPassed: executionResult.passed,
         totalTestCases: executionResult.total,
-        executionTime: Math.round(avgTime),
+        executionTime: Math.round(totalTime),
         memoryUsed: maxMemory,
-        testResults: executionResult.results as any,
-        errorMessage: errorMessage || undefined,
-      });
+        testResults: executionResult.testResults,
+        compilationError: executionResult.compilationError || undefined,
+        runtimeError: executionResult.runtimeError || undefined,
+        errorMessage: executionResult.compilationError || executionResult.runtimeError || undefined,
+      };
+
+      await this.submissionRepository.update(submissionId, updateData);
 
       // Fetch the updated submission to publish final result
       const updatedSubmission = await this.findOne(submissionId);
       await this.publishStatusUpdate(updatedSubmission);
 
       this.logger.log(
-        `Submission ${submissionId} processed: ${finalStatus} (${executionResult.passed}/${executionResult.total})`,
+        `Submission ${submissionId} processed: ${executionResult.submissionStatus} (${executionResult.passed}/${executionResult.total})`,
       );
 
       // If accepted, emit event for leaderboard
-      if (finalStatus === SubmissionStatus.ACCEPTED) {
+      if (executionResult.submissionStatus === SubmissionStatus.ACCEPTED) {
         await this.leaderboardQueue.add('submission.accepted', {
           userId: submission.userId,
           username: submission.username,

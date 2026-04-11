@@ -15,6 +15,12 @@ export class DiscussionService {
     return this.commentRepository.save(comment);
   }
 
+  async findAll() {
+    return this.commentRepository.find({
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async findByProblem(problemId: number) {
     return this.commentRepository.find({
       where: { problemId },
