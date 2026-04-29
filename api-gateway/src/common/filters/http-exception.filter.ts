@@ -55,7 +55,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
       correlationId,
-      // Stack trace only in non-production
       stack: process.env.NODE_ENV !== "production" ? exception.stack : undefined,
     });
   }
