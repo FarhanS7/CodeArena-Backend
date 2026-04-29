@@ -42,6 +42,7 @@ export class AppModule implements NestModule {
     const aiServiceUrl = this.configService.get<string>('AI_SERVICE_URL', 'http://localhost:3006');
     const contestServiceUrl = this.configService.get<string>('CONTEST_SERVICE_URL', 'http://localhost:3008');
     const searchServiceUrl = this.configService.get<string>('SEARCH_SERVICE_URL', 'http://localhost:3007');
+    const emailServiceUrl = this.configService.get<string>('EMAIL_SERVICE_URL', 'http://localhost:3010');
 
     // Apply Correlation ID Middleware to all routes
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');
@@ -106,5 +107,10 @@ export class AppModule implements NestModule {
     consumer
       .apply(proxy(searchServiceUrl, proxyOptions))
       .forRoutes('search');
+
+    // Proxy Email Service
+    consumer
+      .apply(proxy(emailServiceUrl, proxyOptions))
+      .forRoutes('email');
   }
 }

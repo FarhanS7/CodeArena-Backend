@@ -18,6 +18,8 @@ public class ProblemUpdateRequest {
     private String description;
     private String exampleInput;
     private String exampleOutput;
+    private Boolean published;
+    private List<String> tags;
 
     @Valid
     private List<TestCaseRequest> testCases;

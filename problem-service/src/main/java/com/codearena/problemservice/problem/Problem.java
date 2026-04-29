@@ -52,6 +52,14 @@ public class Problem {
     @JsonIgnoreProperties("problem") // prevent infinite recursion + lazy issues
     private List<TestCase> testCases = new ArrayList<>();
 
+    @Column(nullable = false)
+    private boolean published = false;
+
+    @jakarta.persistence.ElementCollection
+    @jakarta.persistence.CollectionTable(name = "problem_tags", joinColumns = @jakarta.persistence.JoinColumn(name = "problem_id"))
+    @Column(name = "tag")
+    private List<String> tags = new ArrayList<>();
+
     // ---- Constructors ----
 
     public Problem() {
@@ -129,5 +137,21 @@ public class Problem {
 
     public void setTestCases(List<TestCase> testCases) {
         this.testCases = testCases;
+    }
+
+    public boolean isPublished() {
+        return published;
+    }
+
+    public void setPublished(boolean published) {
+        this.published = published;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 }

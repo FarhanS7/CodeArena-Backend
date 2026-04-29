@@ -112,6 +112,12 @@ public class ProblemService {
         if (request.getExampleOutput() != null) {
             problem.setExampleOutput(request.getExampleOutput());
         }
+        if (request.getPublished() != null) {
+            problem.setPublished(request.getPublished());
+        }
+        if (request.getTags() != null) {
+            problem.setTags(request.getTags());
+        }
 
         // 3. If no test cases provided, we only update fields
         if (request.getTestCases() == null) {

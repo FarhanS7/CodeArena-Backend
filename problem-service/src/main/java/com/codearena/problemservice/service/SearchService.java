@@ -49,6 +49,8 @@ public class SearchService {
             doc.put("title", problem.getTitle());
             doc.put("description", problem.getDescription());
             doc.put("difficulty", problem.getDifficulty().toString());
+            doc.put("published", problem.isPublished());
+            doc.put("tags", problem.getTags());
             
             // Meilisearch addDocuments expects a JSON string
             String jsonDocuments = objectMapper.writeValueAsString(new Map[]{doc});
