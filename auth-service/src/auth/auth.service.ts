@@ -77,10 +77,22 @@ export class AuthService {
     const hashedRefresh = await bcrypt.hash(refreshToken, 10);
     await this.userService.updateRefreshToken(user.id, hashedRefresh);
 
+    const safeUser = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+      bio: user.bio,
+      avatarUrl: user.avatarUrl,
+      socialLinks: user.socialLinks,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+
     return {
       accessToken,
       refreshToken,
-      user,
+      user: safeUser,
     };
   }
 

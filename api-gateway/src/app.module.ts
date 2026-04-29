@@ -40,6 +40,7 @@ export class AppModule implements NestModule {
     const leaderboardServiceUrl = this.configService.get<string>('LEADERBOARD_SERVICE_URL', 'http://localhost:3003');
     const discussionServiceUrl = this.configService.get<string>('DISCUSSION_SERVICE_URL', 'http://localhost:3004');
     const aiServiceUrl = this.configService.get<string>('AI_SERVICE_URL', 'http://localhost:3006');
+    const contestServiceUrl = this.configService.get<string>('CONTEST_SERVICE_URL', 'http://localhost:3008');
 
     // Apply Correlation ID Middleware to all routes
     consumer.apply(CorrelationIdMiddleware).forRoutes('*');
@@ -69,7 +70,15 @@ export class AppModule implements NestModule {
 
     // Proxy Execution Service
     consumer
-      .apply(proxy(executionServiceUrl, proxyOptions))
+      .apply(
+        proxy(executionServiceUrl, {
+          ...proxyOptions,
+          proxyReqPathResolver: (req) => {
+            const suffix = req.url === '/' ? '' : req.url;
+            return `/api/submissions${suffix}`;
+          },
+        }),
+      )
       .forRoutes('submissions');
 
     // Proxy Leaderboard Service
@@ -86,5 +95,10 @@ export class AppModule implements NestModule {
     consumer
       .apply(proxy(aiServiceUrl, proxyOptions))
       .forRoutes('ai');
+
+    // Proxy Contest Service
+    consumer
+      .apply(proxy(contestServiceUrl, proxyOptions))
+      .forRoutes('contests');
   }
 }

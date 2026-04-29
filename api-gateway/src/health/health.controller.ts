@@ -4,26 +4,30 @@ import {
     HealthCheck,
     HealthCheckService,
     HttpHealthIndicator,
-    TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
+import { HEALTH_ENDPOINTS } from './health-endpoints';
 
 @Controller('health')
 export class HealthController {
   constructor(
     private health: HealthCheckService,
     private http: HttpHealthIndicator,
-    private db: TypeOrmHealthIndicator,
     private config: ConfigService,
   ) {}
 
   @Get()
   @HealthCheck()
   check() {
+    const authBaseUrl = this.config.get('AUTH_SERVICE_URL', 'http://localhost:3001');
+    const problemBaseUrl = this.config.get('PROBLEM_SERVICE_URL', 'http://localhost:8080');
+    const executionBaseUrl = this.config.get('EXECUTION_SERVICE_URL', 'http://localhost:3002');
+    const aiBaseUrl = this.config.get('AI_SERVICE_URL', 'http://localhost:3006');
+
     return this.health.check([
-      () => this.http.pingCheck('auth-service', this.config.get('AUTH_SERVICE_URL', 'http://localhost:3001')),
-      () => this.http.pingCheck('problem-service', this.config.get('PROBLEM_SERVICE_URL', 'http://localhost:8080') + '/actuator/health'),
-      () => this.http.pingCheck('execution-service', this.config.get('EXECUTION_SERVICE_URL', 'http://localhost:3002')),
-      () => this.http.pingCheck('ai-service', this.config.get('AI_SERVICE_URL', 'http://localhost:3006') + '/ai/hint'), // simple ping
+      () => this.http.pingCheck('auth-service', `${authBaseUrl}${HEALTH_ENDPOINTS.auth}`),
+      () => this.http.pingCheck('problem-service', `${problemBaseUrl}${HEALTH_ENDPOINTS.problem}`),
+      () => this.http.pingCheck('execution-service', `${executionBaseUrl}${HEALTH_ENDPOINTS.execution}`),
+      () => this.http.pingCheck('ai-service', `${aiBaseUrl}${HEALTH_ENDPOINTS.ai}`),
     ]);
   }
 }

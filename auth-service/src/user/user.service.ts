@@ -30,7 +30,15 @@ export class UserService {
   }
 
   async updateUser(user: any) {
-    await this.userRepository.update(user.id, { role: user.role });
+    const updateData: any = {};
+
+    if (user.role !== undefined) updateData.role = user.role;
+    if (user.bio !== undefined) updateData.bio = user.bio;
+    if (user.avatarUrl !== undefined) updateData.avatarUrl = user.avatarUrl;
+    if (user.socialLinks !== undefined) updateData.socialLinks = user.socialLinks;
+    if (user.username !== undefined) updateData.username = user.username;
+
+    await this.userRepository.update(user.id, updateData);
     return this.userRepository.findById(user.id);
   }
 }

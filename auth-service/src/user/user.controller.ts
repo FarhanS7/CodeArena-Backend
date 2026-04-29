@@ -1,4 +1,5 @@
-import { Controller, Param, Patch } from '@nestjs/common';
+import { Controller, ForbiddenException, Param, Patch, Req, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Role } from './user.entity';
 import { UserService } from './user.service';
 
@@ -10,7 +11,16 @@ export class UserController {
    * DEVELOPMENT ONLY: Promote a user to ADMIN role
    */
   @Patch(':id/promote-admin')
-  async promoteToAdmin(@Param('id') userId: string) {
+  @UseGuards(JwtAuthGuard)
+  async promoteToAdmin(@Param('id') userId: string, @Req() req) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException('This endpoint is disabled in production');
+    }
+
+    if (req.user?.role !== Role.ADMIN) {
+      throw new ForbiddenException('Admin role required');
+    }
+
     const user = await this.userService.findById(userId);
     if (!user) {
       throw new Error('User not found');
