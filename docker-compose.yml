@@ -5,11 +5,11 @@ services:
     container_name: auth_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: auth_db
+      POSTGRES_USER: ${AUTH_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${AUTH_DB_NAME:-auth_db}
     ports:
-      - "21000:5432"
+      - "${AUTH_DB_PORT_MAPPING:-21000}:5432"
     volumes:
       - auth_data:/var/lib/postgresql/data
     networks:
@@ -21,11 +21,11 @@ services:
     container_name: execution_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: execution_db
+      POSTGRES_USER: ${EXECUTION_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${EXECUTION_DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${EXECUTION_DB_NAME:-execution_db}
     ports:
-      - "21001:5432"
+      - "${EXECUTION_DB_PORT_MAPPING:-21001}:5432"
     volumes:
       - execution_data:/var/lib/postgresql/data
     networks:
@@ -38,6 +38,9 @@ services:
     restart: always
     env_file:
       - ./auth-service/.env.local
+    environment:
+      - DATABASE_URL=postgresql://${AUTH_DB_USER:-postgres}:${AUTH_DB_PASSWORD:-postgres}@auth-db:5432/${AUTH_DB_NAME:-auth_db}
+      - JWT_SECRET=${JWT_SECRET}
     ports:
       - "20001:3100"
     depends_on:
@@ -54,12 +57,12 @@ services:
       PORT: 3002
       DB_HOST: execution-db
       DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      DB_DATABASE: execution_db
+      DB_USERNAME: ${EXECUTION_DB_USER:-postgres}
+      DB_PASSWORD: ${EXECUTION_DB_PASSWORD:-postgres}
+      DB_DATABASE: ${EXECUTION_DB_NAME:-execution_db}
       PROBLEM_SERVICE_URL: http://problem-service:8080
-      JWT_SECRET: your-secret-key-change-this-in-production
-      JUDGE0_URL: https://judge0-ce.p.rapidapi.com
+      JWT_SECRET: ${JWT_SECRET}
+      JUDGE0_URL: ${JUDGE0_URL:-https://judge0-ce.p.rapidapi.com}
       JUDGE0_API_KEY: ${JUDGE0_API_KEY}
     ports:
       - "20002:3002"
@@ -74,11 +77,11 @@ services:
     container_name: problem_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: problem_db
+      POSTGRES_USER: ${PROBLEM_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${PROBLEM_DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${PROBLEM_DB_NAME:-problem_db}
     ports:
-      - "21002:5432"
+      - "${PROBLEM_DB_PORT_MAPPING:-21002}:5432"
     volumes:
       - problem_data:/var/lib/postgresql/data
     networks:
@@ -90,9 +93,9 @@ services:
     container_name: problemservice
     restart: always
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://problem-db:5432/problem_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://problem-db:5432/${PROBLEM_DB_NAME:-problem_db}
+      SPRING_DATASOURCE_USERNAME: ${PROBLEM_DB_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${PROBLEM_DB_PASSWORD:-postgres}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     ports:
       - "20003:8080"
@@ -124,6 +127,7 @@ services:
       LEADERBOARD_SERVICE_URL: http://leaderboard-service:3003
       CONTEST_SERVICE_URL: http://contest-service:3008
       AI_SERVICE_URL: http://ai-service:3006
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "20000:3000"
     depends_on:
@@ -139,11 +143,11 @@ services:
     container_name: leaderboard_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: leaderboard_db
+      POSTGRES_USER: ${LEADERBOARD_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${LEADERBOARD_DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${LEADERBOARD_DB_NAME:-leaderboard_db}
     ports:
-      - "21003:5432"
+      - "${LEADERBOARD_DB_PORT_MAPPING:-21003}:5432"
     volumes:
       - leaderboard_data:/var/lib/postgresql/data
     networks:
@@ -158,9 +162,9 @@ services:
       PORT: 3003
       DB_HOST: leaderboard-db
       DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      DB_DATABASE: leaderboard_db
+      DB_USERNAME: ${LEADERBOARD_DB_USER:-postgres}
+      DB_PASSWORD: ${LEADERBOARD_DB_PASSWORD:-postgres}
+      DB_DATABASE: ${LEADERBOARD_DB_NAME:-leaderboard_db}
       REDIS_HOST: redis
       REDIS_PORT: 6379
     ports:
@@ -177,11 +181,11 @@ services:
     container_name: discussion_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: discussion_db
+      POSTGRES_USER: ${DISCUSSION_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DISCUSSION_DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DISCUSSION_DB_NAME:-discussion_db}
     ports:
-      - "21004:5432"
+      - "${DISCUSSION_DB_PORT_MAPPING:-21004}:5432"
     volumes:
       - discussion_data:/var/lib/postgresql/data
     networks:
@@ -196,9 +200,9 @@ services:
       PORT: 3004
       DB_HOST: discussion-db
       DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      DB_DATABASE: discussion_db
+      DB_USERNAME: ${DISCUSSION_DB_USER:-postgres}
+      DB_PASSWORD: ${DISCUSSION_DB_PASSWORD:-postgres}
+      DB_DATABASE: ${DISCUSSION_DB_NAME:-discussion_db}
     ports:
       - "20005:3004"
     depends_on:
@@ -215,6 +219,7 @@ services:
       PORT: 3005
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "20006:3005"
     depends_on:
@@ -228,7 +233,7 @@ services:
     container_name: meilisearch
     restart: always
     environment:
-      MEILI_MASTER_KEY: masterKey123
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-masterKey123}
       MEILI_NO_ANALYTICS: "true"
     ports:
       - "21006:7700"
@@ -245,7 +250,7 @@ services:
     environment:
       PORT: 3006
       GEMINI_API_KEY: ${GEMINI_API_KEY}
-      PROBLEM_SERVICE_URL: http://problem-service:8080
+      PROBLEM_SERVICE_URL: http://problemservice:8080
     ports:
       - "20007:3006"
     depends_on:
@@ -259,11 +264,11 @@ services:
     container_name: contest_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: contest_db
+      POSTGRES_USER: ${CONTEST_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${CONTEST_DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${CONTEST_DB_NAME:-contest_db}
     ports:
-      - "21007:5432"
+      - "${CONTEST_DB_PORT_MAPPING:-21007}:5432"
     volumes:
       - contest_data:/var/lib/postgresql/data
     networks:
@@ -278,12 +283,12 @@ services:
       PORT: 3008
       DB_HOST: contest-db
       DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      DB_DATABASE: contest_db
-      JWT_SECRET: your-secret-key-change-this-in-production
+      DB_USERNAME: ${CONTEST_DB_USER:-postgres}
+      DB_PASSWORD: ${CONTEST_DB_PASSWORD:-postgres}
+      DB_DATABASE: ${CONTEST_DB_NAME:-contest_db}
+      JWT_SECRET: ${JWT_SECRET}
       AUTH_SERVICE_URL: http://auth-service:3100
-      PROBLEM_SERVICE_URL: http://problem-service:8080
+      PROBLEM_SERVICE_URL: http://problemservice:8080
       EXECUTION_SERVICE_URL: http://execution-service:3002
     ports:
       - "20008:3008"
