@@ -26,8 +26,8 @@ export class ContestParticipant {
   @Column('int')
   contestId: number;
 
-  @Column('int')
-  userId: number;
+  @Column({ type: 'varchar', length: 64 })
+  userId: string;
 
   @Column({
     type: 'enum',

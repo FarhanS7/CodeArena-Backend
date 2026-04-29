@@ -28,7 +28,7 @@ export class ContestService {
   ) {}
 
   // Contest CRUD operations
-  async create(createContestDto: CreateContestDto, createdBy: number): Promise<Contest> {
+  async create(createContestDto: CreateContestDto, createdBy: string): Promise<Contest> {
     const {
       problems,
       registrationStartTime,
@@ -117,7 +117,7 @@ export class ContestService {
     return contest;
   }
 
-  async update(id: number, updateContestDto: UpdateContestDto, userId: number): Promise<Contest> {
+  async update(id: number, updateContestDto: UpdateContestDto, userId: string): Promise<Contest> {
     const contest = await this.findOne(id);
 
     // Check if user has permission to update (creator or admin)
@@ -155,7 +155,7 @@ export class ContestService {
     return this.findOne(id);
   }
 
-  async updateStatus(id: number, updateStatusDto: UpdateContestStatusDto, userId: number): Promise<Contest> {
+  async updateStatus(id: number, updateStatusDto: UpdateContestStatusDto, userId: string): Promise<Contest> {
     const contest = await this.findOne(id);
 
     // Check permissions
@@ -182,7 +182,7 @@ export class ContestService {
     return this.findOne(id);
   }
 
-  async delete(id: number, userId: number): Promise<void> {
+  async delete(id: number, userId: string): Promise<void> {
     const contest = await this.findOne(id);
 
     // Check permissions
@@ -199,7 +199,7 @@ export class ContestService {
   }
 
   // Participation methods
-  async registerParticipant(registerDto: RegisterContestDto, userId: number): Promise<ContestParticipant> {
+  async registerParticipant(registerDto: RegisterContestDto, userId: string): Promise<ContestParticipant> {
     const contest = await this.findOne(registerDto.contestId);
 
     // Validate registration eligibility
@@ -229,7 +229,7 @@ export class ContestService {
     return this.participantRepository.save(participant);
   }
 
-  async startParticipation(contestId: number, userId: number): Promise<ContestParticipant> {
+  async startParticipation(contestId: number, userId: string): Promise<ContestParticipant> {
     const contest = await this.findOne(contestId);
     const participant = await this.findParticipant(contestId, userId);
 
@@ -250,7 +250,7 @@ export class ContestService {
     return this.findParticipant(contestId, userId);
   }
 
-  async submitSolution(submitDto: SubmitToContestDto, userId: number): Promise<void> {
+  async submitSolution(submitDto: SubmitToContestDto, userId: string): Promise<void> {
     const contest = await this.findOne(submitDto.contestId);
     const participant = await this.findParticipant(submitDto.contestId, userId);
 
@@ -306,7 +306,7 @@ export class ContestService {
     return { participants, total };
   }
 
-  async getUserParticipation(contestId: number, userId: number): Promise<ContestParticipant | null> {
+  async getUserParticipation(contestId: number, userId: string): Promise<ContestParticipant | null> {
     return this.participantRepository.findOne({
       where: { contestId, userId },
       relations: ['contest'],
@@ -314,7 +314,7 @@ export class ContestService {
   }
 
   // Helper methods
-  private async findParticipant(contestId: number, userId: number): Promise<ContestParticipant> {
+  private async findParticipant(contestId: number, userId: string): Promise<ContestParticipant> {
     const participant = await this.participantRepository.findOne({
       where: { contestId, userId },
     });
@@ -360,7 +360,7 @@ export class ContestService {
     }
   }
 
-  private validateRegistrationEligibility(contest: Contest, userId: number): void {
+  private validateRegistrationEligibility(contest: Contest, userId: string): void {
     if (!contest.isRegistrationOpen) {
       throw new BadRequestException('Registration is not open for this contest');
     }

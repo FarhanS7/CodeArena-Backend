@@ -15,7 +15,7 @@ interface ContestResult {
   contestId: number;
   finalResults: Array<{
     rank: number;
-    userId: number;
+    userId: string;
     totalScore: number;
     totalPenaltyMinutes: number;
     problemsSolved: number;

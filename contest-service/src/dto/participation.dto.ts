@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsEnum } from 'class-validator';
+import { IsInt, IsOptional, IsEnum, IsString } from 'class-validator';
 import { ParticipantStatus } from '../entities/contest-participant.entity';
 
 export class RegisterContestDto {
@@ -6,7 +6,8 @@ export class RegisterContestDto {
   contestId: number;
 
   @IsOptional()
-  userId?: number; // Will be set from JWT token
+  @IsString()
+  userId?: string; // Will be set from JWT token
 }
 
 export class UpdateParticipantDto {
@@ -51,5 +52,6 @@ export class SubmitToContestDto {
   points?: number;
 
   @IsOptional()
-  userId?: number; // Will be set from JWT token
+  @IsString()
+  userId?: string; // Will be set from JWT token
 }

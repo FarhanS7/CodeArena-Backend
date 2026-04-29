@@ -27,7 +27,7 @@ export class ContestParticipantResponseDto {
   id: number;
 
   @Expose()
-  userId: number;
+  userId: string;
 
   @Expose()
   username: string; // From user service

@@ -74,8 +74,8 @@ export class Contest {
   @Column('int', { nullable: true })
   maxParticipants: number;
 
-  @Column('int')
-  createdBy: number; // Admin user ID
+  @Column({ type: 'varchar', length: 64 })
+  createdBy: string; // Admin user ID
 
   @Column('boolean', { default: true })
   isPublic: boolean;
