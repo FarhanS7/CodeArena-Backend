@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
 } from '@nestjs/common';
 import { EmailService } from './email.service';
@@ -8,6 +9,11 @@ import { EmailService } from './email.service';
 @Controller('email')
 export class EmailController {
   constructor(private readonly emailService: EmailService) {}
+
+  @Get('/health')
+  healthCheck() {
+    return { status: 'ok', service: 'email-service', timestamp: new Date().toISOString() };
+  }
 
   @Post('send-verification')
   async sendVerificationEmail(@Body() dto: { to: string; token: string }) {

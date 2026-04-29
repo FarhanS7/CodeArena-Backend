@@ -3,10 +3,13 @@ import { ConfigModule } from "@nestjs/config";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthModule } from "./auth/auth.module";
+import { CorrelationIdMiddleware } from "./common/middleware/correlation-id.middleware";
 import { RequestContextMiddleware } from "./common/middleware/request-context.middleware";
 import envConfig from "./config/env.config";
 import { ormconfig } from "./config/ormconfig";
 import { UserModule } from "./user/user.module";
+
+import { HealthModule } from "./health/health.module";
 
 @Module({
   imports: [
@@ -22,10 +25,11 @@ import { UserModule } from "./user/user.module";
     }),
     UserModule,
     AuthModule,
+    HealthModule,
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestContextMiddleware).forRoutes("*");
+    consumer.apply(CorrelationIdMiddleware, RequestContextMiddleware).forRoutes("*");
   }
 }

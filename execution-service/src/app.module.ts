@@ -4,11 +4,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
-import { RedisModule } from './common/redis/redis.module';
-import envConfig from './config/env.config';
-import { ormConfig } from './config/ormconfig';
-import { SubmissionModule } from './submission/submission.module';
+
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -29,12 +28,13 @@ import { SubmissionModule } from './submission/submission.module';
     }),
     SubmissionModule,
     RedisModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+    consumer.apply(CorrelationIdMiddleware, HttpLoggerMiddleware).forRoutes('*');
   }
 }

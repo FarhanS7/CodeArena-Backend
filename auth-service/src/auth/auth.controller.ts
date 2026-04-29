@@ -18,14 +18,7 @@ import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Get("health")
-  health() {
-    return {
-      status: "ok",
-      service: "auth-service",
-      timestamp: new Date().toISOString(),
-    };
-  }
+
 
   @Post("signup")
   async signup(@Body() dto: SignupDto) {

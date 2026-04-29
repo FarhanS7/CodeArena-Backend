@@ -5,6 +5,11 @@ import { SearchService } from './search.service';
 export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
+  @Get('/health')
+  healthCheck() {
+    return { status: 'ok', service: 'search-service', timestamp: new Date().toISOString() };
+  }
+
   @Get('problems')
   async searchProblems(
     @Query('q') query: string = '',
