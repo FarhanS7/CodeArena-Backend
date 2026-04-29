@@ -1,14 +1,60 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { MeiliSearch, Index } from 'meilisearch';
 
 @Injectable()
-export class SearchService {
-  constructor(
-    @InjectRepository('SavedProblems') private savedProblemsRepo: Repository<any>,
-    @InjectRepository('SearchHistory') private searchHistoryRepo: Repository<any>,
-    @InjectRepository('SearchPresets') private searchPresetsRepo: Repository<any>,
-  ) {}
+export class SearchService implements OnModuleInit {
+  private client: MeiliSearch;
+  private problemIndex: Index;
+
+  constructor(private configService: ConfigService) {
+    this.client = new MeiliSearch({
+      host: this.configService.get<string>('MEILI_HOST', 'http://meilisearch:7700'),
+      apiKey: this.configService.get<string>('MEILI_MASTER_KEY', 'masterKey123'),
+    });
+    this.problemIndex = this.client.index('problems');
+  }
+
+  async onModuleInit() {
+    // Ensure index settings
+    await this.problemIndex.updateSettings({
+      searchableAttributes: ['title', 'description', 'tags'],
+      filterableAttributes: ['difficulty', 'tags'],
+      sortableAttributes: ['createdAt', 'acceptanceRate'],
+    });
+  }
+
+  async searchProblems(query: string, filters?: any) {
+    const searchParams: any = {
+      limit: 20,
+    };
+
+    if (filters) {
+      const filterArray = [];
+      if (filters.difficulty) filterArray.push(`difficulty = "${filters.difficulty}"`);
+      if (filters.tags && filters.tags.length > 0) {
+        filterArray.push(`tags IN [${filters.tags.map(t => `"${t}"`).join(',')}]`);
+      }
+      if (filterArray.length > 0) {
+        searchParams.filter = filterArray.join(' AND ');
+      }
+    }
+
+    const results = await this.problemIndex.search(query, searchParams);
+    return {
+      data: results.hits,
+      total: results.estimatedTotalHits,
+      processingTimeMs: results.processingTimeMs,
+    };
+  }
+
+  async indexProblem(problem: any) {
+    return this.problemIndex.addDocuments([problem]);
+  }
+
+  async deleteProblem(problemId: number) {
+    return this.problemIndex.deleteDocument(problemId);
+  }
 
   // SAVED PROBLEMS
   async saveProblem(userId: string, problemId: number, collection?: string) {

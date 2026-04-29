@@ -127,6 +127,7 @@ services:
       LEADERBOARD_SERVICE_URL: http://leaderboard-service:3003
       CONTEST_SERVICE_URL: http://contest-service:3008
       AI_SERVICE_URL: http://ai-service:3006
+      SEARCH_SERVICE_URL: http://search-service:3007
       JWT_SECRET: ${JWT_SECRET}
     ports:
       - "20000:3000"
@@ -134,6 +135,7 @@ services:
       - auth-service
       - execution-service
       - problem-service
+      - search-service
     networks:
       - judge_network
 
@@ -224,6 +226,22 @@ services:
       - "20006:3005"
     depends_on:
       - redis
+    networks:
+      - judge_network
+
+  # Search Service (NestJS)
+  search-service:
+    build: ./search-service
+    container_name: search_service
+    restart: always
+    environment:
+      PORT: 3007
+      MEILI_HOST: http://meilisearch:7700
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-masterKey123}
+    ports:
+      - "20010:3007"
+    depends_on:
+      - meilisearch
     networks:
       - judge_network
 
