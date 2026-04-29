@@ -38,6 +38,8 @@ export class SubmissionService {
     private judge0Service: Judge0Service,
     @InjectQueue('leaderboard-queue')
     private leaderboardQueue: Queue,
+    @InjectQueue('submission-queue')
+    private submissionQueue: Queue,
     @Inject('REDIS_PUBLISHER')
     private redisPublisher: Redis,
   ) {
@@ -74,9 +76,15 @@ export class SubmissionService {
     // Publish initial status
     await this.publishStatusUpdate(savedSubmission);
 
-    // Process submission asynchronously
-    this.processSubmission(savedSubmission.id).catch((error) => {
-      this.logger.error(`Error processing submission ${savedSubmission.id}:`, error);
+    // Process submission asynchronously via queue
+    await this.submissionQueue.add('process', { submissionId: savedSubmission.id }, {
+      jobId: `submission_${savedSubmission.id}`, // Idempotency at queue level
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 5000,
+      },
+      removeOnComplete: true,
     });
 
     return savedSubmission;
@@ -120,9 +128,17 @@ export class SubmissionService {
     });
   }
 
-  private async processSubmission(submissionId: number): Promise<void> {
+  async processSubmission(submissionId: number): Promise<void> {
     this.logger.log(`Starting processing for submission: ${submissionId}`);
     try {
+      const submission = await this.findOne(submissionId);
+
+      // Idempotency check: Don't process if already finished or currently processing
+      if (submission.status !== SubmissionStatus.PENDING) {
+        this.logger.warn(`Submission ${submissionId} is already in state ${submission.status}. Skipping.`);
+        return;
+      }
+
       // Update status to PROCESSING
       await this.submissionRepository.update(submissionId, {
         status: SubmissionStatus.PROCESSING,

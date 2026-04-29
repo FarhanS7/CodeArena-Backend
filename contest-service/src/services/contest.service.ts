@@ -200,33 +200,57 @@ export class ContestService {
 
   // Participation methods
   async registerParticipant(registerDto: RegisterContestDto, userId: string): Promise<ContestParticipant> {
-    const contest = await this.findOne(registerDto.contestId);
+    const queryRunner = this.contestRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    // Validate registration eligibility
-    this.validateRegistrationEligibility(contest, userId);
+    try {
+      // 1. Fetch contest with pessimistic lock to prevent race conditions on maxParticipants
+      const contest = await queryRunner.manager.findOne(Contest, {
+        where: { id: registerDto.contestId },
+        lock: { mode: 'pessimistic_write' },
+        relations: ['participants'],
+      });
 
-    // Check if already registered
-    const existingParticipant = await this.participantRepository.findOne({
-      where: { contestId: registerDto.contestId, userId },
-    });
+      if (!contest) {
+        throw new NotFoundException(`Contest with ID ${registerDto.contestId} not found`);
+      }
 
-    if (existingParticipant) {
-      throw new ConflictException('You are already registered for this contest');
+      // 2. Validate registration eligibility
+      this.validateRegistrationEligibility(contest, userId);
+
+      // 3. Check if already registered (idempotency)
+      const existingParticipant = await queryRunner.manager.findOne(ContestParticipant, {
+        where: { contestId: registerDto.contestId, userId },
+      });
+
+      if (existingParticipant) {
+        throw new ConflictException('You are already registered for this contest');
+      }
+
+      // 4. Check max participants limit
+      if (contest.maxParticipants && contest.participants.length >= contest.maxParticipants) {
+        throw new BadRequestException('Contest has reached maximum participants limit');
+      }
+
+      // 5. Create and save participant
+      const participant = this.participantRepository.create({
+        contestId: registerDto.contestId,
+        userId,
+        status: ParticipantStatus.REGISTERED,
+        isOfficial: contest.isRated,
+      });
+
+      const savedParticipant = await queryRunner.manager.save(participant);
+      
+      await queryRunner.commitTransaction();
+      return savedParticipant;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-
-    // Check max participants limit
-    if (contest.maxParticipants && contest.participants.length >= contest.maxParticipants) {
-      throw new BadRequestException('Contest has reached maximum participants limit');
-    }
-
-    const participant = this.participantRepository.create({
-      contestId: registerDto.contestId,
-      userId,
-      status: ParticipantStatus.REGISTERED,
-      isOfficial: contest.isRated, // Official participation for rated contests
-    });
-
-    return this.participantRepository.save(participant);
   }
 
   async startParticipation(contestId: number, userId: string): Promise<ContestParticipant> {
