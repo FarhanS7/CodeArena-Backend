@@ -131,7 +131,7 @@ export class SubmissionService {
   async processSubmission(submissionId: number): Promise<void> {
     this.logger.log(`Starting processing for submission: ${submissionId}`);
     try {
-      const submission = await this.findOne(submissionId);
+      let submission = await this.findOne(submissionId);
 
       // Idempotency check: Don't process if already finished or currently processing
       if (submission.status !== SubmissionStatus.PENDING) {
@@ -145,7 +145,7 @@ export class SubmissionService {
       });
       await this.publishStatusUpdate({ id: submissionId, status: SubmissionStatus.PROCESSING } as any);
 
-      const submission = await this.findOne(submissionId);
+      submission = await this.findOne(submissionId);
 
       // Fetch problem and test cases from problem service
       const problem = await this.fetchProblem(submission.problemId);

@@ -6,6 +6,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
+import envConfig from './config/env.config';
+import { ormConfig } from './config/ormconfig';
+import { SubmissionModule } from './submission/submission.module';
+import { RedisModule } from './common/redis/redis.module';
 
 import { HealthModule } from './health/health.module';
 

@@ -147,7 +147,7 @@ export class ContestService {
 
       // Update end time if necessary
       if (updateContestDto.startTime || updateContestDto.durationInMinutes) {
-        updateContestDto['endTime'] = new Date(start.getTime() + duration * 60 * 1000);
+        updateContestDto['endTime'] = new Date(start.getTime() + duration * 60 * 1000).toISOString();
       }
     }
 
@@ -295,7 +295,7 @@ export class ContestService {
     // Update participant's problem score
     // Note: This would need integration with execution service to get actual results
     const isCorrect = submitDto.points > 0; // Simplified logic
-    participant.updateProblemScore(
+    participant.updateProblemScoreICPC(
       submitDto.problemId,
       submitDto.points || 0,
       isCorrect,

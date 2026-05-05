@@ -196,7 +196,7 @@ export class ContestScoringService {
               (p) => p.problemId.toString() === problemId,
             );
             const basePoints = problem
-              ? this.getProblemPoints(problem.difficulty)
+              ? problem.points
               : 100;
 
             // Calculate ICPC score
