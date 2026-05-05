@@ -16,6 +16,8 @@ import { EmailProcessor } from './email.processor';
         connection: {
           host: config.get('REDIS_HOST', 'localhost'),
           port: config.get('REDIS_PORT', 6379),
+          password: config.get('REDIS_PASSWORD'),
+          tls: config.get('REDIS_TLS') === 'true' ? {} : undefined,
         },
       }),
     }),

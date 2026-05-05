@@ -18,6 +18,8 @@ import { ScoreModule } from './score/score.module';
         redis: {
           host: configService.get('REDIS_HOST', 'localhost'),
           port: configService.get('REDIS_PORT', 6379),
+          password: configService.get('REDIS_PASSWORD'),
+          tls: configService.get('REDIS_TLS') === 'true' ? {} : undefined,
         },
       }),
       inject: [ConfigService],
@@ -29,6 +31,8 @@ import { ScoreModule } from './score/score.module';
         options: {
           host: configService.get('REDIS_HOST', 'localhost'),
           port: configService.get('REDIS_PORT', 6379),
+          password: configService.get('REDIS_PASSWORD'),
+          tls: configService.get('REDIS_TLS') === 'true' ? {} : undefined,
         },
       }),
       inject: [ConfigService],
