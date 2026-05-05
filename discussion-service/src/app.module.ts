@@ -31,6 +31,12 @@ import { Comment } from './discussion/entities/comment.entity';
         database: config.get<string>('DB_DATABASE', 'discussion_db'),
         entities: [Comment],
         synchronize: true, // Only for dev
+        ssl: true,
+        extra: {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        },
       }),
     }),
     TypeOrmModule.forFeature([Comment]),

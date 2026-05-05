@@ -28,6 +28,12 @@ import { ContestProblem } from './entities/contest-problem.entity';
         entities: [Contest, ContestParticipant, ContestProblem],
         synchronize: configService.get('NODE_ENV') !== 'production',
         logging: configService.get('NODE_ENV') === 'development',
+        ssl: true,
+        extra: {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        },
       }),
       inject: [ConfigService],
     }),
@@ -41,7 +47,7 @@ import { ContestProblem } from './entities/contest-problem.entity';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET', 'your-secret-key-change-this'),
         signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '15m'),
+          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '15m') as any,
         },
       }),
       inject: [ConfigService],

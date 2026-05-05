@@ -10,4 +10,10 @@ export const ormConfig = (): TypeOrmModuleOptions => ({
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   synchronize: process.env.NODE_ENV !== 'production', // Auto-create tables in development
   logging: process.env.NODE_ENV !== 'production',
+  ssl: true,
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
 });

@@ -10,4 +10,10 @@ export const ormconfig = (): TypeOrmModuleOptions => ({
   database: process.env.DB_NAME,
   synchronize: true, // dev only
   entities: [User],
+  ssl: true,
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
 });

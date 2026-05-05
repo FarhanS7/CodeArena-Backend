@@ -21,20 +21,55 @@ const services = [
   'search-service'
 ];
 
+// Mapping of service names to their prefix in the root .env
+const serviceMappings = {
+  'auth-service': 'AUTH',
+  'execution-service': 'EXECUTION',
+  'leaderboard-service': 'LEADERBOARD',
+  'discussion-service': 'DISCUSSION',
+  'contest-service': 'CONTEST'
+};
+
+const rootEnvContent = fs.readFileSync(rootEnvPath, 'utf8');
+const rootEnvLines = rootEnvContent.split('\n');
+
 let successCount = 0;
 
 for (const service of services) {
   const serviceEnvPath = path.join(__dirname, service, '.env');
+  let serviceEnvContent = rootEnvContent + '\n\n# --- AUTO-MAPPED DB CREDENTIALS ---\n';
+
+  const prefix = serviceMappings[service];
+  if (prefix) {
+    // Map prefixed variables to generic ones for this service
+    rootEnvLines.forEach(line => {
+      if (line.startsWith(`${prefix}_DB_`)) {
+        const [key, value] = line.split('=');
+        const genericKey = key.replace(`${prefix}_`, ''); // e.g. AUTH_DB_USER -> DB_USER
+        // Special case for PASSWORD/PASS mismatch in some services
+        if (genericKey === 'DB_PASSWORD') {
+            serviceEnvContent += `DB_PASSWORD=${value}\n`;
+            serviceEnvContent += `DB_PASS=${value}\n`; // Support both
+        } else if (genericKey === 'DB_USER') {
+            serviceEnvContent += `DB_USER=${value}\n`;
+            serviceEnvContent += `DB_USERNAME=${value}\n`; // Support both
+        } else {
+            serviceEnvContent += `${genericKey}=${value}\n`;
+        }
+      }
+    });
+  }
+
   try {
-    fs.copyFileSync(rootEnvPath, serviceEnvPath);
-    console.log(`✅ Copied .env to ${service}/`);
+    fs.writeFileSync(serviceEnvPath, serviceEnvContent);
+    console.log(`✅ Configured and copied .env to ${service}/`);
     successCount++;
   } catch (err) {
-    console.error(`❌ Failed to copy .env to ${service}/: ${err.message}`);
+    console.error(`❌ Failed to configure .env for ${service}/: ${err.message}`);
   }
 }
 
 if (successCount === services.length) {
-  console.log('\n🎉 Successfully distributed .env to all services!');
+  console.log('\n🎉 Successfully distributed and mapped .env to all services!');
   console.log('You can now run "npm run start:all" to launch the cluster.');
 }
