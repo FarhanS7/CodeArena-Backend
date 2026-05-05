@@ -11,8 +11,9 @@ export class AiService {
 
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('gemini.apiKey', '');
+    const modelName = this.configService.get<string>('gemini.model', 'gemini-1.5-flash');
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    this.model = this.genAI.getGenerativeModel({ model: modelName });
   }
 
   async getHint(problemId: number, code: string, language: string) {
