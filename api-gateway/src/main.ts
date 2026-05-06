@@ -4,7 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
-import { EnvValidator, EnvValidationRule } from './common/utils/env-validation.util';
+import { EnvValidator, EnvValidationRule } from '../../shared-config/env-validation.util';
 import { CorsConfig } from '../shared-config/cors.config';
 
 const rules: EnvValidationRule[] = [

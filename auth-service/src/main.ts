@@ -5,7 +5,7 @@ import * as dotenv from "dotenv";
 import { AppModule } from "./app.module";
 import { AllExceptionsFilter } from "./common/filters/http-exception.filter";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
-import { EnvValidator, EnvValidationRule } from "./common/utils/env-validation.util";
+import { EnvValidator, EnvValidationRule } from "../../shared-config/env-validation.util";
 import { CorsConfig } from "../shared-config/cors.config";
 
 dotenv.config({ path: ".env.local" });
