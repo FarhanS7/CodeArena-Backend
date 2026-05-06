@@ -2,17 +2,19 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { EnvValidator, EnvValidationRule } from './common/utils/env-validation.util';
+import { CorsConfig } from '../shared-config/cors.config';
 
 const rules: EnvValidationRule[] = [
   { key: "PORT", required: false, defaultValue: "3007", description: "Port" },
   { key: "MEILI_HOST", required: true, description: "Meilisearch host" },
-  { key: "MEILI_MASTER_KEY", required: false, defaultValue: "masterKey123", description: "Meilisearch master key" },
+  { key: "MEILI_MASTER_KEY", required: false, defaultValue: "masterKey123", description: "Meilisearch key" },
 ];
 
 async function bootstrap() {
   EnvValidator.validate(rules);
   const logger = new Logger('SearchService');
   const app = await NestFactory.create(AppModule);
+  app.enableCors(CorsConfig.getOptions());
   const port = process.env.PORT || 3007;
   await app.listen(port);
   logger.log(`Running on port ${port}`);

@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { EnvValidator, EnvValidationRule } from './common/utils/env-validation.util';
+import { CorsConfig } from '../shared-config/cors.config';
 
 const rules: EnvValidationRule[] = [
   { key: "PORT", required: false, defaultValue: "3006", description: "Port" },
@@ -15,6 +16,7 @@ async function bootstrap() {
   const logger = new Logger('AIService');
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
+  app.enableCors(CorsConfig.getOptions());
   const port = process.env.PORT ?? 3006;
   await app.listen(port);
   logger.log(`Running on port ${port}`);

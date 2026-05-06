@@ -6,10 +6,10 @@ import { AppModule } from "./app.module";
 import { AllExceptionsFilter } from "./common/filters/http-exception.filter";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 import { EnvValidator, EnvValidationRule } from "./common/utils/env-validation.util";
+import { CorsConfig } from "../shared-config/cors.config";
 
 dotenv.config({ path: ".env.local" });
 
-// Define required environment variables
 const envValidationRules: EnvValidationRule[] = [
   {
     key: "PORT",
@@ -57,7 +57,6 @@ const envValidationRules: EnvValidationRule[] = [
 ];
 
 async function bootstrap() {
-  // Validate environment variables before creating NestJS app
   EnvValidator.validate(envValidationRules);
 
   const logger = new Logger("AuthService");
@@ -75,16 +74,14 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  app.enableCors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
-    credentials: true,
-  });
+  // Use standardized CORS configuration (Issue #2 FIX)
+  app.enableCors(CorsConfig.getOptions());
 
   const port = process.env.PORT || 3100;
   await app.listen(port);
-  logger.log(`🚀 Auth Service running on port ${port}`);
+  logger.log(`Running on port ${port}`);
 }
 bootstrap().catch((error) => {
-  console.error("❌ Failed to start Auth Service:", error.message);
+  console.error("Failed to start Auth Service:", error.message);
   process.exit(1);
 });
