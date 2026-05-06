@@ -128,12 +128,16 @@ export class SearchService implements OnModuleInit {
 
   // AUTOCOMPLETE
   async getAutocomplete(query: string) {
-    // Simple implementation - would integrate with search engine
+    const results = await this.problemIndex.search(query, {
+      limit: 5,
+      attributesToRetrieve: ['id', 'title'],
+    });
+
     return {
-      data: [
-        { id: 1, title: `${query} Problem 1` },
-        { id: 2, title: `${query} Problem 2` },
-      ],
+      data: results.hits.map(hit => ({
+        id: hit.id,
+        title: hit.title,
+      })),
     };
   }
 
@@ -156,22 +160,34 @@ export class SearchService implements OnModuleInit {
     return { success: true };
   }
 
-  // SEARCH STATS
-  async getSearchStats() {
-    return {
-      totalSearches: 150,
-      averageSearchTime: 2.5,
-      mostSearched: 'Two Sum',
-      trendingSearches: ['Two Sum', 'Array', 'DP'],
-    };
-  }
-
   async getTrendingSearches() {
     return {
       data: [
         { query: 'Two Sum', searches: 500, trend: 'up' },
         { query: 'Array Problems', searches: 400, trend: 'stable' },
       ],
+    };
+  }
+
+  // RECOMMENDATIONS
+  async getRecommendations(userId: string) {
+    // 1. Get user's saved problems to understand preferences
+    const saved = await this.savedProblemsRepo.find({ where: { userId } });
+    
+    // 2. Extract common attributes (difficulty, etc.)
+    // For simplicity, let's just recommend based on the most frequent difficulty or a default
+    const preferredDifficulty = saved.length > 0 
+      ? saved[0].collection // This is a placeholder, in real life we'd calculate
+      : 'EASY';
+
+    // 3. Search for similar problems
+    const results = await this.problemIndex.search('', {
+      limit: 5,
+      filter: `difficulty = "${preferredDifficulty}"`,
+    });
+
+    return {
+      data: results.hits,
     };
   }
 
