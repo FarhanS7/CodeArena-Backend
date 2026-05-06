@@ -12,13 +12,18 @@ export class CorsConfig {
    */
   static getOptions(origin?: string): CorsOptions {
     const corsOrigin = origin || process.env.CORS_ORIGIN || 'http://localhost:3000';
+    
+    // Explicitly prevent * in production (SECURITY HARDENING)
+    const isProduction = process.env.NODE_ENV === 'production';
+    const allowedOrigin = (isProduction && corsOrigin === '*') 
+      ? (process.env.ALLOWED_ORIGINS?.split(',')[0] || 'https://codearena.com')
+      : (corsOrigin === '*' ? 'http://localhost:3000' : corsOrigin);
 
     return {
-      // Restrict to specific origin (SECURITY FIX for Issue #2)
-      origin: corsOrigin === '*' ? 'http://localhost:3000' : corsOrigin,
+      origin: allowedOrigin,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-correlation-id'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-correlation-id', 'Accept'],
       maxAge: 3600, // 1 hour
       optionsSuccessStatus: 200,
     };
