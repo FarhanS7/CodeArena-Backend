@@ -205,3 +205,6 @@ mvnw.cmd
 # Test output files
 test_output*.txt
 test_debug.txt
+
+# Generated shared-config copies
+**/src/shared-config/

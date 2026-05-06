@@ -63,12 +63,17 @@ export class AppModule implements NestModule {
     // Proxy Auth Service
     consumer
       .apply(proxy(authServiceUrl, proxyOptions))
-      .forRoutes('auth');
+      .forRoutes('api/auth');
+
+    // Proxy User/Profile (part of auth service)
+    consumer
+      .apply(proxy(authServiceUrl, proxyOptions))
+      .forRoutes('api/users');
 
     // Proxy Problem Service
     consumer
       .apply(proxy(problemServiceUrl, proxyOptions))
-      .forRoutes('problems');
+      .forRoutes('api/problems');
 
     // Proxy Execution Service
     consumer
@@ -81,36 +86,41 @@ export class AppModule implements NestModule {
           },
         }),
       )
-      .forRoutes('submissions');
+      .forRoutes('api/submissions');
 
     // Proxy Leaderboard Service
     consumer
       .apply(proxy(leaderboardServiceUrl, proxyOptions))
-      .forRoutes('leaderboard');
+      .forRoutes('api/leaderboard');
 
     // Proxy Discussion Service
     consumer
       .apply(proxy(discussionServiceUrl, proxyOptions))
-      .forRoutes('discussions');
+      .forRoutes('api/discussions');
 
     // Proxy AI Service
     consumer
       .apply(proxy(aiServiceUrl, proxyOptions))
-      .forRoutes('ai');
+      .forRoutes('api/ai');
 
     // Proxy Contest Service
     consumer
       .apply(proxy(contestServiceUrl, proxyOptions))
-      .forRoutes('contests');
+      .forRoutes('api/contests');
 
     // Proxy Search Service
     consumer
       .apply(proxy(searchServiceUrl, proxyOptions))
-      .forRoutes('search');
+      .forRoutes('api/search');
 
     // Proxy Email Service
     consumer
       .apply(proxy(emailServiceUrl, proxyOptions))
-      .forRoutes('email');
+      .forRoutes('api/email');
+    
+    // Proxy Social Service
+    consumer
+      .apply(proxy(this.configService.get('SOCIAL_SERVICE_URL', 'http://localhost:3009'), proxyOptions))
+      .forRoutes('api/social');
   }
 }

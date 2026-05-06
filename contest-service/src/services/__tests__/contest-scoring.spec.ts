@@ -2,7 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ContestService } from '../contest.service';
 import { Contest } from '../../entities/contest.entity';
 import { ContestParticipant } from '../../entities/contest-participant.entity';
-import { ContestStatus, ParticipantStatus } from '../../enums/contest.enum';
+import { ContestStatus } from '../../entities/contest.entity';
+import { ParticipantStatus } from '../../entities/contest-participant.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 

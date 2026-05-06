@@ -4,7 +4,7 @@
   "description": "Local development orchestrator for Code Arena",
   "scripts": {
     "setup": "node setup-local.js",
-    "start:all": "concurrently -n \"API-GATEWAY,AUTH,EXECUTION,LEADERBOARD,DISCUSSION,CONTEST,REALTIME,AI,SEARCH,EMAIL,PROBLEM\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold,bgYellow.bold,bgCyan.bold,bgRed.bold,bgWhite.bold,bgBlack.bold,bgBlue.bold,bgMagenta.bold,bgGreen.bold\" \"npm run start:dev --prefix api-gateway\" \"npm run start:dev --prefix auth-service\" \"npm run start:dev --prefix execution-service\" \"npm run start:dev --prefix leaderboard-service\" \"npm run start:dev --prefix discussion-service\" \"npm run start:dev --prefix contest-service\" \"npm run start:dev --prefix realtime-service\" \"npm run start:dev --prefix ai-service\" \"npm run start:dev --prefix search-service\" \"npm run start:dev --prefix email-service\" \"cd problem-service && ./mvnw spring-boot:run\"",
+    "start:all": "concurrently -n \"API-GATEWAY,AUTH,EXECUTION,LEADERBOARD,DISCUSSION,CONTEST,REALTIME,AI,SEARCH,EMAIL,PROBLEM\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold,bgYellow.bold,bgCyan.bold,bgRed.bold,bgWhite.bold,bgBlack.bold,bgBlue.bold,bgMagenta.bold,bgGreen.bold\" \"npm run start:dev --prefix api-gateway\" \"npm run start:dev --prefix auth-service\" \"npm run start:dev --prefix execution-service\" \"npm run start:dev --prefix leaderboard-service\" \"npm run start:dev --prefix discussion-service\" \"npm run start:dev --prefix contest-service\" \"npm run start:dev --prefix realtime-service\" \"npm run start:dev --prefix ai-service\" \"npm run start:dev --prefix search-service\" \"npm run start:dev --prefix email-service\" \"cd problem-service && mvnw spring-boot:run\"",
     "install:all": "npm install --prefix api-gateway && npm install --prefix auth-service && npm install --prefix execution-service && npm install --prefix leaderboard-service && npm install --prefix discussion-service && npm install --prefix contest-service && npm install --prefix realtime-service && npm install --prefix ai-service && npm install --prefix search-service && npm install --prefix email-service"
   },
   "devDependencies": {
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "dotenv": "^17.4.2",
+    "ioredis": "^5.10.1",
     "pg": "^8.20.0"
   }
 }

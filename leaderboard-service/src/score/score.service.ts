@@ -1,7 +1,7 @@
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import Redis from 'ioredis';
+import type { Redis } from 'ioredis';
 import { Repository } from 'typeorm';
 import { UserScore } from './entities/user-score.entity';
 

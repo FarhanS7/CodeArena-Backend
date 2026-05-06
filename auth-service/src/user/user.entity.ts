@@ -40,6 +40,10 @@ export class User {
   @Column({ type: "json", nullable: true })
   socialLinks: { github?: string; twitter?: string; linkedIn?: string };
 
+  // Token versioning for refresh token invalidation (Issue #3)
+  @Column({ type: "int", default: 0 })
+  tokenVersion: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

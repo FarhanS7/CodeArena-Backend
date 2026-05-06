@@ -5,7 +5,7 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { EnvValidator, EnvValidationRule } from '../../shared-config/env-validation.util';
-import { CorsConfig } from '../shared-config/cors.config';
+import { CorsConfig } from './shared-config/cors.config';
 
 const rules: EnvValidationRule[] = [
   { key: "PORT", required: false, defaultValue: "3000", description: "Gateway port" },

@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { EnvValidator } from '../../shared-config/env-validation.util';
-import { CorsConfig } from '../../shared-config/cors.config';
+import { CorsConfig } from './shared-config/cors.config';
 
 async function bootstrap() {
   const logger = new Logger('SocialService');

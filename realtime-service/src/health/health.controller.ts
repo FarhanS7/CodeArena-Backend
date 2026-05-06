@@ -1,6 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
 import { HealthCheck, HealthCheckService, HealthIndicatorResult } from '@nestjs/terminus';
-import { RedisContext } from '../redis/redis.context'; // Assuming this exists or similar
 
 @Controller('health')
 export class HealthController {

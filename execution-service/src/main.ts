@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { EnvValidator, EnvValidationRule } from './common/utils/env-validation.util';
-import { CorsConfig } from '../shared-config/cors.config';
+import { CorsConfig } from './shared-config/cors.config';
 
 const envValidationRules: EnvValidationRule[] = [
   { key: "PORT", required: false, defaultValue: "3002", description: "Port" },

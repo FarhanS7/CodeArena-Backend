@@ -61,6 +61,8 @@ export class AuthService {
     // Refresh token also includes jti for tracking
     const refreshTokenPayload: JwtPayload = {
       sub: user.id,
+      email: user.email,
+      username: user.username,
       role: user.role,
       jti: uuidv4(), // Different jti for refresh token
       tokenVersion: user.tokenVersion || 0,

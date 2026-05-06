@@ -27,7 +27,11 @@ const serviceMappings = {
   'execution-service': 'EXECUTION',
   'leaderboard-service': 'LEADERBOARD',
   'discussion-service': 'DISCUSSION',
-  'contest-service': 'CONTEST'
+  'contest-service': 'CONTEST',
+  'search-service': 'SEARCH',
+  'email-service': 'EMAIL',
+  'social-service': 'SOCIAL',
+  'realtime-service': 'REALTIME'
 };
 
 const rootEnvContent = fs.readFileSync(rootEnvPath, 'utf8');
@@ -37,6 +41,22 @@ let successCount = 0;
 
 for (const service of services) {
   const serviceEnvPath = path.join(__dirname, service, '.env');
+  const serviceSrcPath = path.join(__dirname, service, 'src');
+  const serviceSharedConfigPath = path.join(serviceSrcPath, 'shared-config');
+
+  // Copy shared-config to each service's src folder for build compatibility
+  if (fs.existsSync(serviceSrcPath) && fs.existsSync(path.join(__dirname, 'shared-config'))) {
+    if (!fs.existsSync(serviceSharedConfigPath)) {
+      fs.mkdirSync(serviceSharedConfigPath, { recursive: true });
+    }
+    const sharedFiles = fs.readdirSync(path.join(__dirname, 'shared-config'));
+    sharedFiles.forEach(file => {
+      const srcFile = path.join(__dirname, 'shared-config', file);
+      const destFile = path.join(serviceSharedConfigPath, file);
+      fs.copyFileSync(srcFile, destFile);
+    });
+    console.log(`📦 Synced shared-config to ${service}/src/shared-config/`);
+  }
   
   // Start with root content BUT remove any global PORT that might cause collisions
   let filteredRootEnv = rootEnvLines.filter(l => !l.startsWith('PORT=')).join('\n');
@@ -60,13 +80,16 @@ for (const service of services) {
         // If it's a port, genericKey should be PORT, otherwise remove the prefix
         const genericKey = (key.endsWith('_PORT') && !key.includes('_DB_')) ? 'PORT' : key.replace(`${prefix}_`, ''); 
         
-        // Special case for PASSWORD/PASS mismatch in some services
+        // Special case for PASSWORD/PASS and NAME/DATABASE mismatch
         if (genericKey === 'DB_PASSWORD') {
             serviceEnvContent += `DB_PASSWORD=${value}\n`;
-            serviceEnvContent += `DB_PASS=${value}\n`; // Support both
+            serviceEnvContent += `DB_PASS=${value}\n`; 
         } else if (genericKey === 'DB_USER') {
             serviceEnvContent += `DB_USER=${value}\n`;
-            serviceEnvContent += `DB_USERNAME=${value}\n`; // Support both
+            serviceEnvContent += `DB_USERNAME=${value}\n`;
+        } else if (genericKey === 'DB_NAME') {
+            serviceEnvContent += `DB_NAME=${value}\n`;
+            serviceEnvContent += `DB_DATABASE=${value}\n`; // Support both
         } else if (genericKey === 'PORT') {
             serviceEnvContent += `PORT=${value}\n`;
         } else {

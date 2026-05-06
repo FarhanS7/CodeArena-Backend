@@ -25,6 +25,13 @@ export class UserService {
     });
   }
 
+  // Issue #3: Token version tracking for refresh token invalidation
+  async updateTokenVersion(userId: string, version: number) {
+    await this.userRepository.update(userId, {
+      tokenVersion: version,
+    });
+  }
+
   async findById(id: string) {
     return this.userRepository.findById(id);
   }
