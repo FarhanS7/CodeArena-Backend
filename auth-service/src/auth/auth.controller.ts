@@ -61,14 +61,21 @@ export class AuthController {
 
   @Post("refresh")
   async refresh(@Req() req, @Res() res: Response) {
-    const refreshToken = req.cookies.refresh_token;
+    const currentRefreshToken = req.cookies.refresh_token;
 
-    const accessToken = await this.authService.refreshAccessToken(refreshToken);
+    const { accessToken, refreshToken } = await this.authService.refreshAccessToken(currentRefreshToken);
 
     res.cookie("token", accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
+    });
+
+    res.cookie("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
     return res.json({ message: "Token refreshed" });
