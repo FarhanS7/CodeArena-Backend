@@ -24,6 +24,10 @@ export class HealthController {
     const aiBaseUrl = this.config.get('AI_SERVICE_URL', 'http://localhost:3006');
     const searchBaseUrl = this.config.get('SEARCH_SERVICE_URL', 'http://localhost:3007');
     const emailBaseUrl = this.config.get('EMAIL_SERVICE_URL', 'http://localhost:3010');
+    const leaderboardBaseUrl = this.config.get('LEADERBOARD_SERVICE_URL', 'http://localhost:3003');
+    const discussionBaseUrl = this.config.get('DISCUSSION_SERVICE_URL', 'http://localhost:3004');
+    const contestBaseUrl = this.config.get('CONTEST_SERVICE_URL', 'http://localhost:3008');
+    const realtimeBaseUrl = this.config.get('REALTIME_SERVICE_URL', 'http://localhost:3005');
 
     return this.health.check([
       () => this.http.pingCheck('auth-service', `${authBaseUrl}${HEALTH_ENDPOINTS.auth}`),
@@ -32,6 +36,10 @@ export class HealthController {
       () => this.http.pingCheck('ai-service', `${aiBaseUrl}${HEALTH_ENDPOINTS.ai}`),
       () => this.http.pingCheck('search-service', `${searchBaseUrl}${HEALTH_ENDPOINTS.search}`),
       () => this.http.pingCheck('email-service', `${emailBaseUrl}${HEALTH_ENDPOINTS.email}`),
+      () => this.http.pingCheck('leaderboard-service', `${leaderboardBaseUrl}${HEALTH_ENDPOINTS.leaderboard}`),
+      () => this.http.pingCheck('discussion-service', `${discussionBaseUrl}${HEALTH_ENDPOINTS.discussion}`),
+      () => this.http.pingCheck('contest-service', `${contestBaseUrl}${HEALTH_ENDPOINTS.contest}`),
+      () => this.http.pingCheck('realtime-service', `${realtimeBaseUrl}${HEALTH_ENDPOINTS.realtime}`),
     ]);
   }
 }
