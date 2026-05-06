@@ -7,6 +7,8 @@ import { HealthModule } from './health/health.module';
 import { SavedProblem } from './entities/saved-problem.entity';
 import { SearchHistory } from './entities/search-history.entity';
 import { SearchPreset } from './entities/search-preset.entity';
+import { RedisProvider } from './common/redis/redis.provider';
+import { ProblemEventListener } from './listeners/problem-event.listener';
 
 @Module({
   imports: [
@@ -33,6 +35,6 @@ import { SearchPreset } from './entities/search-preset.entity';
     HealthModule,
   ],
   controllers: [SearchController],
-  providers: [SearchService],
+  providers: [SearchService, ...RedisProvider, ProblemEventListener],
 })
 export class AppModule {}

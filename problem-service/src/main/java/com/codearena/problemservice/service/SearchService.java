@@ -3,77 +3,58 @@ package com.codearena.problemservice.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
 import com.codearena.problemservice.problem.Problem;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.meilisearch.sdk.Client;
-import com.meilisearch.sdk.Config;
-import com.meilisearch.sdk.Index;
-import com.meilisearch.sdk.json.JacksonJsonHandler;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class SearchService {
 
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ChannelTopic topic;
     private final ObjectMapper objectMapper;
-    private Client client;
-    private final String indexName = "problems";
-
-    @Value("${meilisearch.host:http://meilisearch:7700}")
-    private String host;
-
-    @Value("${meilisearch.apiKey:masterKey123}")
-    private String apiKey;
-
-    @PostConstruct
-    public void init() {
-        this.client = new Client(
-            new Config(
-                host, 
-                apiKey, 
-                new JacksonJsonHandler(objectMapper)
-            )
-        );
-    }
 
     public void indexProblem(Problem problem) {
         try {
-            Index index = client.index(indexName);
-            Map<String, Object> doc = new HashMap<>();
-            doc.put("id", problem.getId());
-            doc.put("title", problem.getTitle());
-            doc.put("description", problem.getDescription());
-            doc.put("difficulty", problem.getDifficulty().toString());
-            doc.put("published", problem.isPublished());
-            doc.put("tags", problem.getTags());
+            Map<String, Object> message = new HashMap<>();
+            message.put("event", "PROBLEM_CREATED");
             
-            // Meilisearch addDocuments expects a JSON string
-            String jsonDocuments = objectMapper.writeValueAsString(new Map[]{doc});
-            index.addDocuments(jsonDocuments);
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", problem.getId());
+            data.put("title", problem.getTitle());
+            data.put("description", problem.getDescription());
+            data.put("difficulty", problem.getDifficulty().toString());
+            data.put("published", problem.isPublished());
+            data.put("tags", problem.getTags());
+            
+            message.put("data", data);
+            
+            redisTemplate.convertAndSend(topic.getTopic(), message);
         } catch (Exception e) {
-            // Log error but don't break main flow
-            System.err.println("Failed to index problem in Meilisearch: " + e.getMessage());
+            System.err.println("Failed to publish problem event: " + e.getMessage());
         }
     }
 
     public void deleteProblem(Long id) {
         try {
-            client.index(indexName).deleteDocument(id.toString());
+            Map<String, Object> message = new HashMap<>();
+            message.put("event", "PROBLEM_DELETED");
+            message.put("data", Map.of("id", id));
+            
+            redisTemplate.convertAndSend(topic.getTopic(), message);
         } catch (Exception e) {
-            System.err.println("Failed to delete problem from Meilisearch: " + e.getMessage());
+            System.err.println("Failed to publish delete event: " + e.getMessage());
         }
     }
 
+    // This method is now deprecated as we want to use the SearchService (NestJS)
     public java.util.List<java.util.Map<String, Object>> searchProblems(String query) {
-        try {
-            return (java.util.List<java.util.Map<String, Object>>) (java.util.List<?>) client.index(indexName).search(query).getHits();
-        } catch (Exception e) {
-            throw new RuntimeException("Search failed: " + e.getMessage());
-        }
+        return java.util.List.of();
     }
 }
