@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import envConfig from './config/env.config';
 import { RealtimeGateway } from './realtime.gateway';
 import { RedisModule } from './redis/redis.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { RedisModule } from './redis/redis.module';
       }),
     }),
     RedisModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService, RealtimeGateway],
