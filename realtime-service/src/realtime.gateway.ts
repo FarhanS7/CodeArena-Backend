@@ -61,12 +61,17 @@ export class RealtimeGateway implements OnGatewayInit, OnModuleInit, OnGatewayCo
 
   onModuleInit() {
     this.redisSubscriber.subscribe('submission-verdicts');
+    this.redisSubscriber.subscribe('notifications');
+
     this.redisSubscriber.on('message', (channel, message) => {
+      const data = JSON.parse(message);
+      
       if (channel === 'submission-verdicts') {
-        const data = JSON.parse(message);
-        this.logger.log(`Received message for user ${data.userId}: ${data.status}`);
-        // Only emit to the specific user's room
+        this.logger.log(`Received submission update for user ${data.userId}`);
         this.server.to(`user_${data.userId}`).emit('submission-update', data);
+      } else if (channel === 'notifications') {
+        this.logger.log(`Received notification for user ${data.userId}`);
+        this.server.to(`user_${data.userId}`).emit('notification', data.notification);
       }
     });
   }
