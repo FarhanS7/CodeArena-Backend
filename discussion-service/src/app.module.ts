@@ -25,11 +25,12 @@ import { HealthModule } from './health/health.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
-        host: config.get<string>('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 5432),
-        username: config.get<string>('DB_USERNAME', 'postgres'),
-        password: config.get<string>('DB_PASSWORD', 'postgres'),
-        database: config.get<string>('DB_DATABASE', 'discussion_db'),
+        url: config.get('DATABASE_URL'),
+        host: !config.get('DATABASE_URL') ? config.get<string>('DB_HOST', 'localhost') : undefined,
+        port: !config.get('DATABASE_URL') ? config.get<number>('DB_PORT', 5432) : undefined,
+        username: !config.get('DATABASE_URL') ? config.get<string>('DB_USERNAME', 'postgres') : undefined,
+        password: !config.get('DATABASE_URL') ? config.get<string>('DB_PASSWORD', 'postgres') : undefined,
+        database: !config.get('DATABASE_URL') ? config.get<string>('DB_DATABASE', 'discussion_db') : undefined,
         entities: [Comment],
         synchronize: true, // Only for dev
         ssl: true,
