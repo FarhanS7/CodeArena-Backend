@@ -3,11 +3,12 @@ import { User } from "../user/user.entity";
 
 export const ormconfig = (): TypeOrmModuleOptions => ({
   type: "postgres",
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT),
-  username: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
+  url: process.env.DATABASE_URL,
+  host: !process.env.DATABASE_URL ? process.env.DB_HOST : undefined,
+  port: !process.env.DATABASE_URL ? parseInt(process.env.DB_PORT) : undefined,
+  username: !process.env.DATABASE_URL ? process.env.DB_USER : undefined,
+  password: !process.env.DATABASE_URL ? process.env.DB_PASS : undefined,
+  database: !process.env.DATABASE_URL ? process.env.DB_NAME : undefined,
   synchronize: true, // dev only
   entities: [User],
   ssl: true,
