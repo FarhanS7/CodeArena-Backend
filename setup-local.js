@@ -37,15 +37,29 @@ let successCount = 0;
 
 for (const service of services) {
   const serviceEnvPath = path.join(__dirname, service, '.env');
-  let serviceEnvContent = rootEnvContent + '\n\n# --- AUTO-MAPPED DB CREDENTIALS ---\n';
+  
+  // Start with root content BUT remove any global PORT that might cause collisions
+  let filteredRootEnv = rootEnvLines.filter(l => !l.startsWith('PORT=')).join('\n');
+  let serviceEnvContent = filteredRootEnv + '\n\n# --- AUTO-MAPPED DB CREDENTIALS ---\n';
+
+  // If it's the gateway, specifically set its port to the GATEWAY_PORT
+  if (service === 'api-gateway') {
+    const gatewayPortLine = rootEnvLines.find(l => l.startsWith('GATEWAY_PORT='));
+    if (gatewayPortLine) {
+        const port = gatewayPortLine.split('=')[1];
+        serviceEnvContent += `PORT=${port.trim()}\n`;
+    }
+  }
 
   const prefix = serviceMappings[service];
   if (prefix) {
     // Map prefixed variables to generic ones for this service
     rootEnvLines.forEach(line => {
-      if (line.startsWith(`${prefix}_DB_`)) {
+      if (line.startsWith(`${prefix}_DB_`) || line.startsWith(`${prefix}_PORT`)) {
         const [key, value] = line.split('=');
-        const genericKey = key.replace(`${prefix}_`, ''); // e.g. AUTH_DB_USER -> DB_USER
+        // If it's a port, genericKey should be PORT, otherwise remove the prefix
+        const genericKey = (key.endsWith('_PORT') && !key.includes('_DB_')) ? 'PORT' : key.replace(`${prefix}_`, ''); 
+        
         // Special case for PASSWORD/PASS mismatch in some services
         if (genericKey === 'DB_PASSWORD') {
             serviceEnvContent += `DB_PASSWORD=${value}\n`;
@@ -53,6 +67,8 @@ for (const service of services) {
         } else if (genericKey === 'DB_USER') {
             serviceEnvContent += `DB_USER=${value}\n`;
             serviceEnvContent += `DB_USERNAME=${value}\n`; // Support both
+        } else if (genericKey === 'PORT') {
+            serviceEnvContent += `PORT=${value}\n`;
         } else {
             serviceEnvContent += `${genericKey}=${value}\n`;
         }

@@ -4,50 +4,52 @@ import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+import { EnvValidator, EnvValidationRule } from './common/utils/env-validation.util';
+
+const rules: EnvValidationRule[] = [
+  { key: "PORT", required: false, defaultValue: "3000", description: "Gateway port" },
+  { key: "AUTH_SERVICE_URL", required: true, description: "Auth service URL" },
+  { key: "PROBLEM_SERVICE_URL", required: true, description: "Problem service URL" },
+  { key: "EXECUTION_SERVICE_URL", required: true, description: "Execution service URL" },
+  { key: "LEADERBOARD_SERVICE_URL", required: false, defaultValue: "http://localhost:3003", description: "Leaderboard service URL" },
+  { key: "CONTEST_SERVICE_URL", required: false, defaultValue: "http://localhost:3008", description: "Contest service URL" },
+  { key: "JWT_SECRET", required: true, description: "JWT secret" },
+];
 
 async function bootstrap() {
-  const logger = new Logger('Bootstrap');
+  EnvValidator.validate(rules);
+  const logger = new Logger('APIGateway');
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalFilters(new AllExceptionsFilter());
-  
+
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 3000);
+  const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
 
-  // Enable CORS for frontend integration
-  app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      // Add production domain here when ready
-    ],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+  // CORS Middleware with configurable origin (ISSUE #2 FIX)
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', corsOrigin);
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-correlation-id');
+    res.header('Access-Control-Allow-Credentials', 'true');
+
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
+    next();
   });
 
-  // Add security headers with Helmet
   app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'"],
-        fontSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        mediaSrc: ["'self'"],
-        frameSrc: ["'none'"],
-      },
-    },
-    crossOriginEmbedderPolicy: false, // Allow embedding
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
   }));
 
   await app.listen(port);
-  logger.log(`API Gateway is running on: http://localhost:${port}`);
-  logger.log(`Routing /auth/** -> ${configService.get('AUTH_SERVICE_URL', 'http://localhost:3001')}`);
-  logger.log(`Routing /problems/** -> ${configService.get('PROBLEM_SERVICE_URL', 'http://localhost:8080')}`);
-  logger.log(`Routing /submissions/** -> ${configService.get('EXECUTION_SERVICE_URL', 'http://localhost:3002')}`);
+  logger.log(`Running on port ${port}`);
+  logger.log(`CORS origin: ${corsOrigin}`);
 }
-bootstrap();
+bootstrap().catch(e => {
+  console.error('Failed:', e.message);
+  process.exit(1);
+});
