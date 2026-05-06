@@ -6,6 +6,8 @@ import { SocialService } from './social.service';
 import { UserFollow } from './entities/user-follow.entity';
 import { Notification } from './entities/notification.entity';
 import { Achievement } from './entities/achievement.entity';
+import { RedisProvider } from './common/redis/redis.provider';
+import { SocialEventListener } from './listeners/social-event.listener';
 
 @Module({
   imports: [
@@ -29,6 +31,6 @@ import { Achievement } from './entities/achievement.entity';
     TypeOrmModule.forFeature([UserFollow, Notification, Achievement]),
   ],
   controllers: [SocialController],
-  providers: [SocialService],
+  providers: [SocialService, ...RedisProvider, SocialEventListener],
 })
 export class AppModule {}
