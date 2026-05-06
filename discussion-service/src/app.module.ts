@@ -7,6 +7,7 @@ import { JwtStrategy } from './common/guards/jwt.strategy';
 import { DiscussionController } from './discussion/discussion.controller';
 import { DiscussionService } from './discussion/discussion.service';
 import { Comment } from './discussion/entities/comment.entity';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [

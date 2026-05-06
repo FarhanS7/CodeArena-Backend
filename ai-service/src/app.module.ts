@@ -6,6 +6,7 @@ import { AiController } from './ai.controller';
 import { AiService } from './ai.service';
 import { JwtStrategy } from './common/guards/jwt.strategy';
 import envConfig from './config/env.config';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
