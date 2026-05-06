@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ormConfig } from './config/ormconfig';
 import { ScoreModule } from './score/score.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ScoreModule } from './score/score.module';
       inject: [ConfigService],
     }),
     ScoreModule,
+    HealthModule,
   ],
 })
 export class AppModule {}
