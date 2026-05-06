@@ -1,13 +1,26 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { MeiliSearch, Index } from 'meilisearch';
+import { SavedProblem } from './entities/saved-problem.entity';
+import { SearchHistory } from './entities/search-history.entity';
+import { SearchPreset } from './entities/search-preset.entity';
 
 @Injectable()
 export class SearchService implements OnModuleInit {
   private client: MeiliSearch;
   private problemIndex: Index;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    @InjectRepository(SavedProblem)
+    private savedProblemsRepo: Repository<SavedProblem>,
+    @InjectRepository(SearchHistory)
+    private searchHistoryRepo: Repository<SearchHistory>,
+    @InjectRepository(SearchPreset)
+    private searchPresetsRepo: Repository<SearchPreset>,
+  ) {
     this.client = new MeiliSearch({
       host: this.configService.get<string>('MEILI_HOST', 'http://meilisearch:7700'),
       apiKey: this.configService.get<string>('MEILI_MASTER_KEY', 'masterKey123'),
